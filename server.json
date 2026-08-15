@@ -1,0 +1,13 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "com.sociahive/sociahive",
+  "description": "Run your social media from any AI assistant: 70 tools for Instagram DM automation, multi-platform post scheduling (9 platforms), AI flow generation, and analytics.",
+  "version": "1.0.0",
+  "websiteUrl": "https://www.sociahive.com/mcp",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://www.sociahive.com/api/mcp"
+    }
+  ]
+}
