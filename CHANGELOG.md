@@ -17,13 +17,13 @@ The MCP server itself runs on SociaHive's side and changes without a release her
 - Setup leads with OAuth 2.1 sign-in on first use instead of pasting an API key into a config file. API keys still work.
 - The README now covers the plugins, the skill and the CLI, and states that MCP, API and CLI access need the 7-day trial or a paid plan.
 
-## [Registry listing] - 2026-08-15
+## Before 1.0.0 (registry listing, 2026-08-15)
 
 First public version of this repository, before it had a release tag.
 
 ### Added
 
 - `server.json`: the MCP registry manifest for `com.sociahive/sociahive`, a streamable HTTP remote at `https://www.sociahive.com/api/mcp`.
-- A README with setup for Claude Code, Claude, Cursor and other MCP clients, and the safety model (scoped API keys, confirmation before anything goes live, automations created as drafts).
+- A README with setup for Claude Code, Claude, Cursor and other MCP clients, and the safety model (scoped API keys, confirmation before publishing now, automations created as drafts).
 
 [1.0.0]: https://github.com/sociahive/sociahive-mcp/releases/tag/v1.0.0

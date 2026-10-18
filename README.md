@@ -73,7 +73,7 @@ MCP, API key and CLI access are part of the 7-day trial and every paid plan.
 ## What's in this repository
 
 - `server.json`: the MCP registry manifest.
-- `skills/sociahive/SKILL.md`: which tool to use for which job, the CLI commands and the safety rules (copied to the root `SKILL.md`).
+- `skills/sociahive/SKILL.md`: when to use SociaHive, which tool fits which request, step-by-step workflows, error handling and the safety rules (copied to the root `SKILL.md`). `skills/sociahive/references/` holds the full tool catalog and the CLI guide (linked from the root as `references/`).
 - Plugin manifests for Claude Code (`.claude-plugin/`), Cursor (`.cursor-plugin/`), Codex (`.codex-plugin/`, `.agents/plugins/`), Grok Build (`.grok-plugin/`) and a Gemini CLI extension (`gemini-extension.json`, `GEMINI.md`).
 
 ## What it can do
@@ -99,12 +99,6 @@ claude mcp add --transport http sociahive https://www.sociahive.com/api/mcp
 ```
 
 ### Codex
-
-```bash
-codex plugin marketplace add sociahive/sociahive-mcp
-```
-
-Or only the MCP server, then sign in:
 
 ```bash
 codex mcp add sociahive --url https://www.sociahive.com/api/mcp
@@ -137,7 +131,19 @@ gemini mcp add --transport http sociahive https://www.sociahive.com/api/mcp
 
 ### Claude and ChatGPT
 
-Add a custom connector with the URL `https://www.sociahive.com/api/mcp` and sign in when asked.
+Add a custom connector with the URL `https://www.sociahive.com/api/mcp` and sign in when asked. ChatGPT custom connectors need a paid ChatGPT plan.
+
+### Grok
+
+No OAuth sign-in yet. Make an API key (Settings > API keys) and add a remote MCP server where Grok asks for one:
+
+```
+Name:    sociahive
+URL:     https://www.sociahive.com/api/mcp
+Header:  Authorization: Bearer sk-your-api-key
+```
+
+See [sociahive.com/connect-ai/grok](https://www.sociahive.com/connect-ai/grok).
 
 ### Any agent that reads skills
 
@@ -151,7 +157,7 @@ npx skills add sociahive/sociahive-mcp
 npx @sociahive/mcp add
 ```
 
-The wizard detects your agents and writes their MCP config.
+The wizard detects your agents and writes their MCP config. The published version covers the clients it lists today; Codex and Gemini CLI support arrives with the next release, so use the commands above for them for now.
 
 ### Agent frameworks
 
@@ -168,7 +174,7 @@ Things to ask your AI tool once SociaHive is connected:
 | "What's on my calendar next week?" | `get_scheduler_calendar` |
 | "Move all of Friday's posts to Monday." | `bulk_reschedule_posts` |
 | "When someone comments PRICE on my latest reel, DM them my price list." | `generate_flow` |
-| "Turn that automation on." | `activate_flow` (asks you to confirm) |
+| "Turn that automation on." | `activate_flow` (your AI tool should check with you first) |
 | "How did my posts do this month?" | `get_analytics_overview`, `get_post_analytics` |
 | "What kind of content works best for me?" | `get_content_insights` |
 | "How many emails has my lead magnet collected?" | `get_collected_data` |
@@ -182,7 +188,7 @@ The same jobs from the CLI:
 | Upload local files, get hosted URLs | `sociahive upload slide_01.jpg slide_02.jpg` |
 | Create a post | `sociahive posts create --text "..." --platforms '[{"platform":"instagram","accountId":"..."}]' --scheduled-at "2026-11-01T15:00:00Z"` |
 | Import posts from a CSV (as drafts) | `sociahive posts import posts.csv` |
-| See the month | `sociahive calendar --month 2026-11` |
+| See what is scheduled | `sociahive posts list --status scheduled` |
 | Draft an automation | `sociahive flows generate --description "DM my price list when someone comments PRICE"` |
 | Turn an automation on or off | `sociahive flows activate <id>`, `sociahive flows deactivate <id>` |
 | What works for this account | `sociahive insights --weeks 8` |
@@ -204,8 +210,9 @@ Run `sociahive --help` or `sociahive <command> --help` for every option. The ful
 ## Safety
 
 - API keys are scoped (`posts:read`, `posts:write`, `flows:write`, `analytics:read`, ...); a read-only key can never publish. OAuth sign-in offers read-only access.
-- Publishing to a live audience and turning an automation on ask for confirmation first: nothing goes live until a second, confirming call.
-- Automations are created as drafts for you to review.
+- Publishing now and other irreversible or bulk actions ask for confirmation: nothing goes live until a second, confirming call.
+- Automations are created as drafts. The skill tells your AI tool to check with you before turning one on; that is an instruction to the agent, not a server-side lock, so review what it built.
+- X posting is available on paid plans only.
 
 ## Data and permissions
 

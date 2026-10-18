@@ -1,133 +1,143 @@
 ---
 name: sociahive
-description: Use SociaHive to schedule and publish social media posts to Instagram, TikTok, X (Twitter), LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest; to build and run DM and comment automations (comment-to-DM, keyword replies, lead capture) on Instagram, Facebook, Messenger, WhatsApp and Telegram; and to read post, automation and account analytics. Use it when the user asks to post, schedule, plan a content calendar, upload media for a post, set up an automation that replies to comments or DMs, collect leads, or check how their posts and automations perform.
+description: Operates a user's SociaHive account through MCP tools or the sociahive CLI. Schedules, drafts, reschedules and publishes posts on Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest; uploads media; builds and turns on DM and comment automations (comment-to-DM, keyword replies, lead capture) on Instagram, Messenger, WhatsApp and Telegram; imports posts from CSV; reads post, automation and content analytics. Use when the user asks to post, schedule or plan social content, attach a comment automation to a post, turn comments into DMs, build an auto-reply or chatbot flow, collect leads, bulk import posts, or check what is working. Needs a SociaHive account on the 7-day trial or a paid plan.
 homepage: https://www.sociahive.com/connect-ai
 allowed-tools: Bash(sociahive:*)
 ---
 
 # SociaHive
 
-SociaHive is a social media platform for creators and small teams: one place to schedule posts on 9 networks, automate DMs and comment replies, and see what works.
+SociaHive schedules posts on 9 networks, runs DM and comment automations, and reports what works. Drive it with MCP tools when they are connected; use the `sociahive` CLI for local files, CSV import and scripts.
 
-There are two ways to drive it. Prefer the MCP tools when they are connected; use the `sociahive` CLI for local files and scripted bulk work.
+Full tool list: [references/tools.md](references/tools.md). CLI commands and flags: [references/cli.md](references/cli.md).
 
-## 1. MCP server (preferred)
+## Connect and check
 
-- Endpoint: `https://www.sociahive.com/api/mcp` (streamable HTTP).
-- Sign-in: OAuth 2.1 with dynamic client registration. The first call returns 401 and the client opens a SociaHive sign-in page. No token goes in any config file.
-- If SociaHive tools are listed (`list_accounts`, `schedule_post`, `generate_flow`, ...), use them directly.
-- If they are not listed, ask the user to connect SociaHive in their agent (see https://www.sociahive.com/connect-ai) or fall back to the CLI.
+1. MCP endpoint: `https://www.sociahive.com/api/mcp` (streamable HTTP). Clients that support OAuth 2.1 (Claude, ChatGPT, Codex, Cursor, Gemini CLI) sign in on first use: the first call returns 401 and a SociaHive sign-in page opens. Others (Grok, custom agents) send an API key (`X-API-Key: sk_...` or `Authorization: Bearer sk_...`).
+2. Call `whoami` first. It confirms the connection and returns the tier. If SociaHive tools are not listed, ask the user to connect SociaHive (https://www.sociahive.com/connect-ai) or use the CLI.
+3. CLI: `npm install -g sociahive`, then `export SOCIAHIVE_API_KEY=sk_...` (Settings, API keys; needs `agent:execute`). Check with `sociahive whoami`. Never print the key or write it to files.
+4. Plan: MCP, API and CLI need the 7-day trial or a paid plan. On the free plan the tool list still loads, but every call returns an error result starting "This SociaHive action was not run". Nothing ran. Tell the user to check their SociaHive plan and stop; do not retry.
 
-## 2. CLI
+## Which tool for which request
 
-```bash
-npm install -g sociahive          # or run without installing: npx sociahive <command>
-export SOCIAHIVE_API_KEY=sk_...   # https://www.sociahive.com/settings?tab=api-keys
-sociahive --help
-```
+| User wants | Use |
+|---|---|
+| New post (draft or scheduled) from given text | `create_scheduled_post` |
+| Schedule a draft that already exists | `schedule_post` |
+| Change time, text or media of an existing post | `update_scheduled_post` (reschedule is always this, never `schedule_post`) |
+| Move many posts | `bulk_reschedule_posts` (max 50) |
+| Un-schedule a post | `cancel_scheduled_post` (returns it to draft) |
+| Post right now | `create_scheduled_post` (no time), then `publish_post_now` after the user agrees |
+| What is planned | `list_scheduled_posts`, `get_scheduler_calendar` |
+| Image or video from a URL for a post | `upload_media_from_url` |
+| Local file, CSV, loops | CLI: `sociahive upload`, `posts import` |
+| Comment automation tied to a new post | `schedule_post` with `attach_automation` |
+| Automation from a description | `generate_flow`, then `activate_flow` after the user agrees |
+| Find or edit an existing automation | `list_flows`, `search_flows`, `get_flow`, `update_node` |
+| Which reel or post is live on Instagram | `get_latest_published_media`, `list_published_media`, `search_published_media` |
+| Performance | `get_analytics_overview`, `get_post_analytics`, `get_content_insights`, `get_flow_stats` |
 
-The key needs the `agent:execute` scope. Never print the key or write it into files the user did not ask for.
+## Rules that apply to every task
 
-Use the CLI when:
+**Confirmation.** Publishing to a live audience cannot be undone. `publish_post_now` (and `publish`, `generate_multiple_flows`, `create_broadcast`, `create_sequence`) first return `{"__mcp_envelope":"pending_confirmation","confirmToken":...,"summary":...}`. Show the user the summary, wait for a clear yes, then call again with the same arguments plus `"__confirmToken": "<token>"`. The token is single use and expires in 5 minutes. In the CLI add `--yes` only after the user agreed. `activate_flow` has no confirmation step, so you must ask first: it makes the automation reply to real people.
 
-- A post needs local images or videos: `sociahive upload <file> [<file> ...]` prints the hosted URLs, or pass `--media-file <path>` to `posts create`. (Over MCP, `upload_media_from_url` copies a file from a public URL.)
-- The user has a CSV of posts: `sociahive posts import <file.csv>` (columns `text`, `platforms` separated by `|`, `media` URLs separated by `|`). Every row becomes a draft.
-- The work is a script or a loop over many posts or flows.
+**Platform ids** for `platforms[].platform` and filters: `instagram`, `facebook`, `twitter` (this is X), `linkedin`, `threads`, `tiktok`, `youtube`, `bluesky`, `pinterest`. Flows use only `instagram`, `whatsapp`, `messenger`, `telegram`.
 
-## Plan requirement
+**Accounts.** Name the platform and let the server pick the account: `platforms: [{"platform":"instagram"}]`. Do not call `list_accounts` first. If the user has several accounts on a platform you get `ambiguous_reference` with the handles; ask which, then pass `accountId` (the `id` field of `list_accounts`, 24 hex characters; never the `platformUserId` or a @handle). `generate_flow`, `create_automation` and the published-media tools need `accountId` when the user has more than one account; without it they return `no_account_selected`. Never invent an id.
 
-MCP, API key and CLI access are part of the 7-day free trial and every paid plan. On the free plan every tool call answers with an upgrade message and a billing link; relay it to the user and stop. Do not retry.
+**Time.** `scheduledAt` takes ISO 8601 with an offset (`2026-11-03T09:00:00-05:00`) or a short phrase the server resolves: `tomorrow 9am`, `friday 5pm`, `next monday`, `in 2 hours`. A day without a time means 09:00. Always send `timezone` as an IANA name (`America/New_York`); ask the user if you do not know it, because without it the server assumes UTC. A time in the past is rejected. When the phrase could mean two dates (for example "saturday" on a Saturday, or "next tuesday" on a Sunday) or the user's date matters, compute the ISO time with the right offset yourself and read back the date the server resolved. In the CLI always use ISO.
 
-## Safety rules
+**Draft, scheduled, now.** `create_scheduled_post` without `scheduledAt` saves a draft; with it the post is scheduled. There is no create-and-publish call. Prefer scheduling; publish now only when the user says now. A blanket "just do it, don't ask me anything" does not replace the confirmation: still show the one-line summary (text, networks) and get a yes before the `__confirmToken` call. If the user's text is over a network's limit, show the shortened version for that target before using it; never cut their words silently.
 
-- Publishing to a live audience and other irreversible actions need the user's explicit "yes". Over MCP these tools return a confirmation request first: show the user what will happen, and only after they agree call again with the confirmation token. In the CLI, only add `--yes` after the user has agreed.
-- Automations are created as drafts. Turning one on (`activate_flow`) makes it reply to real people; confirm with the user first.
-- Prefer scheduling over publishing now unless the user asks for now.
-- Check `list_accounts` before posting: use only accounts that are connected, and pass their ids.
-- Respect each platform's limits (X 280 characters and up to 4 images, Instagram captions 2,200, LinkedIn 3,000). The server refuses text that does not fit and says which target failed.
+**Limits are checked when a post is scheduled or published, not when a draft is saved.** Text per target: X 280, Bluesky 300, Threads 500, Pinterest 800, Instagram and TikTok 2,200, LinkedIn 3,000, YouTube 5,000, Facebook 63,206. Use `platforms[].text` for a shorter caption on one network instead of cutting the main text.
 
-## MCP tools by job
+**Media.** `media: [{"type":"image"|"video","url":"https://..."}]`, public https URLs or URLs from `upload_media_from_url` or `sociahive upload`. Instagram posts need media (ask for it before drafting one; scheduling fails without it); a carousel is `contentType: "carousel"` on the Instagram target with 2 to 10 items. X takes up to 4 images or 1 video, not both. Bluesky 4 images or 1 video. YouTube needs a video (first line of the text is the title). TikTok needs media. Pinterest needs an image. Instagram Reels and Stories are not available to normal accounts yet: do not set `contentType` to `reels` or `stories`. X is a paid-plan feature.
 
-### Account and setup
-- `whoami`: who is signed in.
-- `list_accounts`: connected social accounts and their ids.
-- `get_capabilities`, `list_capabilities`: what each account and plan can do.
+**Deleting.** The agent cannot delete posts or flows or disconnect accounts. Offer `cancel_scheduled_post` or `deactivate_flow`, or send the user to the dashboard.
 
-### Posts and scheduling
-- `create_scheduled_post`: create a post (draft or scheduled) for one or more accounts, with per-platform text and media.
-- `schedule_post`, `update_scheduled_post`, `cancel_scheduled_post`: schedule a draft, edit it, cancel it.
-- `publish_post_now`, `publish`: publish immediately. Irreversible, asks for confirmation.
-- `list_scheduled_posts`, `get_scheduled_post`, `get_scheduler_calendar`: see what is planned.
-- `bulk_reschedule_posts`: move many posts at once.
-- `upload_media_from_url`: copy an image or video from a public URL into SociaHive for a post.
-- `add_to_evergreen`, `list_evergreen`: keep posts in a queue that is reused when the calendar has gaps.
+**Rate limits.** 120 reads, 30 writes and 5 expensive calls (`generate_flow`, `search_published_media`) per minute, 1,000 calls per day. On `rate_limit`, wait `Retry-After` seconds. Use the bulk tools instead of loops.
 
-### Published content
-- `list_published_media`, `get_latest_published_media`, `get_published_media`, `search_published_media`: posts already live on the user's accounts (for example to attach an automation to a reel).
+## Workflows
 
-### Automations (DM and comment flows)
-- `generate_flow`: describe an automation in plain words ("DM my price list when someone comments PRICE") and get a reviewable draft.
-- `generate_multiple_flows`: rebuild a whole setup (for example from another tool) as several drafts. Asks for confirmation.
-- `create_automation`, `create_flow`: create a flow directly.
-- `list_flows`, `list_flows_with_stats`, `get_flow`, `search_flows`, `summarize_flow_purpose`: find and explain flows.
-- `update_flow`, `duplicate_flow`, `bulk_update_flows`: edit flows.
-- `add_node`, `update_node`, `delete_node`, `add_edge`, `delete_edge`: edit the steps of a flow.
-- `activate_flow`, `deactivate_flow`: turn a flow on or off.
-- `get_flow_revisions`, `revert_flow_to_version`: history and undo.
-- `list_system_templates`: ready-made automation templates.
+### 1. Schedule a post to several networks
 
-### Leads, contacts and growth
-- `get_collected_data`: what a flow has collected (field types and counts).
-- `capture_lead`: record a lead for a contact.
-- `resolve`: answer a support conversation from the knowledge base when confident.
-- `create_broadcast`, `create_sequence`: one-off and drip messages to contacts.
-- `create_landing_page`, `create_growth_widget`, `create_ref_url`, `get_pixel_embed`: entry points that bring people into automations.
-- `search_tags`, `create_tag`, `find_references`: contact tags and where they are used.
+"Post this to Instagram and LinkedIn next Tuesday at 9am" (image at a URL, user is in New York).
+1. If the image URL is not already public https or you want it hosted: `upload_media_from_url {"url":"https://..."}` returns `url` and `mediaType`.
+2. `create_scheduled_post {"text":"...","media":[{"type":"image","url":"<url>"}],"platforms":[{"platform":"instagram"},{"platform":"linkedin","text":"LinkedIn version"}],"scheduledAt":"next tuesday 9am","timezone":"America/New_York"}`.
+3. Read back `status: "scheduled"` and `scheduledAt`, and tell the user the local time. Report per-target errors (`TEXT_TOO_LONG` names the target) and fix only that target.
 
-### Analytics
-- `get_post_analytics`, `get_analytics_overview`: post and account performance.
-- `get_flow_stats`: runs and results of an automation.
-- `get_content_insights`: what kind of content works best for this account.
+### 2. Publish now
 
-## CLI commands
+1. `create_scheduled_post` without `scheduledAt` (a draft). Show the user the text, media and networks.
+2. After a clear yes: `publish_post_now {"postId":"<id>"}`. It returns `pending_confirmation`; show the summary, get a second yes if the first was general, then repeat the call with `__confirmToken`.
+3. Status becomes `publishing`. Tell the user it cannot be undone from here.
 
-```bash
-sociahive whoami
-sociahive accounts list
-sociahive accounts capabilities [--account-id <id>]
+### 3. Move, edit or cancel posts
 
-sociahive upload <file> [<file> ...]
-sociahive posts create (--text "..." | --text-file <path>) --platforms '[{"platform":"instagram","accountId":"..."}]' \
-  [--scheduled-at "2026-11-01T15:00:00Z"] [--timezone UTC] [--media-file <path> ...]
-sociahive posts list [--status <s>] [--platform <p>] [--limit <n>]
-sociahive posts get <id>
-sociahive posts update <id> [--text "..."] [--scheduled-at "..."]
-sociahive posts schedule <id> --at "2026-11-01T15:00:00Z" [--timezone UTC]
-sociahive posts publish <id> --yes          # irreversible, only after the user agrees
-sociahive posts cancel <id>
-sociahive posts import <file.csv>
-sociahive calendar --month 2026-11 [--timezone UTC]
-sociahive evergreen list
-sociahive evergreen add --text "Caption to recycle"
+- One post: `update_scheduled_post {"postName":"launch announcement","scheduledAt":"friday 5pm","timezone":"Europe/London"}` (or `postId`). Published or publishing posts are rejected.
+- Many posts: `list_scheduled_posts {"status":"scheduled"}` then `bulk_reschedule_posts {"postIds":[...],"scheduledAt":"monday 9am","timezone":"..."}`.
+- Cancel: `cancel_scheduled_post {"postId":"..."}`.
+- See the week: `get_scheduler_calendar {"fromDate":"2026-11-02T00:00:00-05:00","toDate":"2026-11-08T23:59:59-05:00"}` (200 posts max). The range has no timezone argument, so give ISO times with the user's offset; a bare date is read as UTC and can miss late-evening posts. Filter on `status` yourself.
 
-sociahive flows generate --description "DM my price list when someone comments PRICE" [--platform instagram]
-sociahive flows bulk-generate --description "..." --yes
-sociahive flows list [--status draft|published|all]
-sociahive flows get <id>
-sociahive flows activate <id>
-sociahive flows deactivate <id>
-sociahive flows duplicate <id>
-sociahive flows stats <id>
-sociahive templates list
+### 4. Turn a new post's comments into DMs
 
-sociahive analytics [--post-id <id>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD]
-sociahive insights [--weeks 8]
-```
+Instagram feed, carousel or reel posts only.
+1. `create_scheduled_post` as a draft with `platforms: [{"platform":"instagram"}]` (no `scheduledAt`).
+2. `schedule_post {"postId":"<id>","scheduledAt":"tomorrow 9am","timezone":"...","attach_automation":{"keyword":"PRICE","link":"https://example.com/price"}}`. Pick exactly one door inside `attach_automation`: `keyword` (+ optional `link`), `prompt` (plain description), or `template_id` (+ `inputs`). Add `accountId` inside it only if the post targets several Instagram accounts. Needs the `flows:write` scope.
+3. The automation is created attached to the post and turned OFF (`armed: false`). Tell the user to review and switch it on from the post's page in the SociaHive scheduler (web or iOS); an agent cannot arm it.
 
-Per-platform text and media go in each `--platforms` target (`"text"`, `"media"`, `"contentType"`, `"metadata"`). Run `sociahive <command> --help` for every option.
+For a post that is already live, use workflow 5 and describe which post it listens on.
 
-## Links
+### 5. Build an automation and turn it on
 
-- Connect guides per agent: https://www.sociahive.com/connect-ai
-- Developer docs: https://www.sociahive.com/developers
-- API keys: https://www.sociahive.com/settings?tab=api-keys
+1. `generate_flow {"description":"When someone comments PRICE on my latest reel, reply 'check your DMs' and DM my price list https://example.com/price","platform":"instagram","accountId":"<id if several accounts>"}`. Description is 10 to 2,000 characters: trigger plus outcome. Optional `businessContext` (`industry`, `product`, `keyword`, `offer`, `tone`). Flow platforms are `instagram`, `whatsapp`, `messenger`, `telegram`. To tie it to a live post find it first (`get_latest_published_media`) and name it in the description.
+2. It builds a draft in the background, 10 to 30 seconds. Poll `get_flow {"flowId":"<id>"}` until it has nodes. Never report it as done before that.
+3. Show the user the trigger, keyword and each message in plain words. Fix details with `update_node {"flowName":"...","nodeId":"the welcome message","text":"..."}` (also `link`, `keywords`). A `[link]` style placeholder left in the copy blocks turning it on.
+4. Ask: "Turn this on? It will reply to real people." Even if the user said "turn it on right away" earlier, they have not seen the built content yet: show it, ask once, and only after that yes: `activate_flow {"flowName":"..."}`. Relay `warnings` of type `keyword_conflict`: another live flow on the account already uses that keyword.
+5. Editing a flow that is on returns `state_error`: tell the user the plan, then `duplicate_flow {"flowName":"Summer Promo","newName":"Summer Promo (SALE)"}`, `get_flow` on the copy to read the trigger node's id or label, `update_node {"flowName":"Summer Promo (SALE)","nodeId":"<trigger label>","keywords":["SALE"]}` (`keywords` replaces the list), check with `get_flow`, `activate_flow` the copy after a yes, then `deactivate_flow` the original after a yes. If the keyword is unchanged, deactivate the original first so two flows do not answer the same comment.
+
+Instagram rules to keep when you edit by hand: in a comment-to-DM flow the first DM is one message only, and Instagram only lets a business message someone inside its 24 hour messaging window (a comment opens it).
+
+### 6. Find what works and plan next week
+
+1. `get_content_insights {"weeks":8}` (1 to 12): which formats, weekdays and pillars beat the account's own average, with sample sizes. Ignore small samples and say when data is insufficient.
+2. `get_analytics_overview {"startDate":"2026-10-01","endDate":"2026-10-28"}` (YYYY-MM-DD; optional `platform`) and `get_post_analytics {"postId":"..."}` for single posts.
+3. `get_scheduler_calendar` for next week to avoid clashes.
+4. Propose the plan as a short list (day, network, topic, format) with the reason from the data. Do not invent numbers.
+5. Create the posts only after the user approves the list, as drafts or scheduled (workflow 1).
+
+### 7. Bulk import posts from a CSV (CLI)
+
+`sociahive posts import posts.csv`. Header row required: `text` and `platforms` (separate several with `|`, for example `instagram|linkedin`), optional `media` (public https URLs separated by `|`; 2 to 10 images on an Instagram row make a carousel). Up to 100 rows. Every row becomes a draft; nothing is scheduled. There is no date column (extra columns such as `date` are ignored, so keep the dates yourself). A file with other column names or comma-separated networks must be converted first (`caption` to `text`, `instagram, linkedin` to `instagram|linkedin`). The result lists `created`, `failed`, `post_ids` and per-row `errors` by line number. Schedule afterwards, one call per draft id with `schedule_post` or `sociahive posts schedule <id> --at ... --timezone ...`.
+
+### 8. Local image or video, then post
+
+1. `sociahive upload ./photo.jpg ./clip.mp4` prints hosted URLs (JPEG, PNG, WebP, MP4, MOV up to the plan's size cap).
+2. Use the URLs in `create_scheduled_post` media, or in one command: `sociahive posts create --text "..." --platforms '[{"platform":"instagram"}]' --media-file ./photo.jpg --scheduled-at "2026-11-03T09:00:00-05:00" --timezone America/New_York`.
+
+## Errors
+
+| Error | Meaning and action |
+|---|---|
+| Result starts "This SociaHive action was not run" | Plan has no AI app access. Tell the user; stop. |
+| `auth_error` | Key or sign-in invalid, revoked, or missing a scope (`missingScope`). Reconnect, or mint a key with that scope. |
+| `ambiguous_reference` | Several accounts, posts or flows match. Ask the user which; pass the id. |
+| `no_account_selected` | Pass `accountId` from `list_accounts`. |
+| `not_found` | Wrong id or not the user's. Look it up by name or list; do not guess. |
+| `validation_error` with `TEXT_TOO_LONG` | The message names the target. Shorten that target with `platforms[].text`. |
+| `validation_error` with `OPTION_UNAVAILABLE` | Account lacks a permission or the plan lacks the platform (X). Tell the user; they may need to reconnect the account. |
+| other `validation_error` | Read the message: past time, unfilled placeholder, flow cannot go live. Fix the input. |
+| `state_error` | Flow is on, or the post is publishing or published. Duplicate the flow, or wait. |
+| `tier_error`, `limit_reached`, `automated_account_limit` | Plan limit. Tell the user which; do not retry. |
+| `rate_limit` | Wait `Retry-After`, then continue. |
+| `upstream_error` | Platform hiccup. Retry once or twice with a pause; if it persists, report it. |
+| Account status `needs_reauth` | The user must reconnect it in SociaHive. Posting to it will fail. |
+
+## Never
+
+- Publish, turn on an automation or send anything to real people without the user's explicit yes in this conversation.
+- Invent account, post or flow ids, platform limits or analytics numbers.
+- Retry after a plan error or loop on a failing call.
+- Print or store the API key.
+
+Links: https://www.sociahive.com/connect-ai (connect guides), https://www.sociahive.com/developers (docs), https://www.sociahive.com/settings?tab=api-keys (keys).
