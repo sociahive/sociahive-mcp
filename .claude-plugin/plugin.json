@@ -1,0 +1,37 @@
+{
+  "name": "sociahive",
+  "displayName": "SociaHive",
+  "version": "1.0.0",
+  "description": "Schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest, build DM and comment automations, and read analytics. Bundles the SociaHive skill and the hosted SociaHive MCP server (sign in with OAuth on first use, no token needed).",
+  "author": {
+    "name": "SociaHive",
+    "url": "https://www.sociahive.com"
+  },
+  "homepage": "https://www.sociahive.com/connect-ai",
+  "repository": "https://github.com/sociahive/sociahive-mcp",
+  "license": "MIT",
+  "keywords": [
+    "sociahive",
+    "social-media",
+    "scheduling",
+    "automation",
+    "mcp",
+    "instagram",
+    "tiktok",
+    "x",
+    "twitter",
+    "linkedin",
+    "facebook",
+    "threads",
+    "youtube",
+    "bluesky",
+    "pinterest",
+    "dm-automation"
+  ],
+  "skills": ["./skills/sociahive"],
+  "icon": "./assets/logo.svg",
+  "documentationUrl": "https://www.sociahive.com/developers",
+  "supportUrl": "https://www.sociahive.com/contact",
+  "privacyPolicyUrl": "https://www.sociahive.com/privacy",
+  "termsOfServiceUrl": "https://www.sociahive.com/terms"
+}

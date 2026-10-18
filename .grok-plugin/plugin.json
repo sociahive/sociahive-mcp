@@ -1,0 +1,28 @@
+{
+  "name": "sociahive",
+  "version": "1.0.0",
+  "description": "SociaHive for Grok Build: schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest, build DM and comment automations, and read analytics.",
+  "author": {
+    "name": "SociaHive",
+    "url": "https://www.sociahive.com"
+  },
+  "homepage": "https://www.sociahive.com/connect-ai",
+  "repository": "https://github.com/sociahive/sociahive-mcp",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "sociahive",
+    "social media scheduler",
+    "schedule social media posts",
+    "instagram dm automation",
+    "comment to dm",
+    "social media analytics"
+  ],
+  "skills": ["./skills/sociahive"],
+  "mcpServers": {
+    "sociahive": {
+      "type": "http",
+      "url": "https://www.sociahive.com/api/mcp"
+    }
+  }
+}

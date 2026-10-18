@@ -1,0 +1,12 @@
+{
+  "name": "sociahive",
+  "version": "1.0.0",
+  "description": "SociaHive: schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest, build DM and comment automations, and read analytics. Bundles the SociaHive skill and the hosted SociaHive MCP server.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "sociahive": {
+      "httpUrl": "https://www.sociahive.com/api/mcp",
+      "description": "Hosted SociaHive MCP server (streamable HTTP). Gemini CLI opens a browser to sign in to SociaHive on first use; no token or local install needed."
+    }
+  }
+}

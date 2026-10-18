@@ -1,0 +1,35 @@
+{
+  "name": "sociahive",
+  "version": "1.0.0",
+  "description": "Schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest, build DM and comment automations, and read analytics, through the hosted SociaHive MCP server.",
+  "author": {
+    "name": "SociaHive",
+    "url": "https://www.sociahive.com"
+  },
+  "homepage": "https://www.sociahive.com/connect-ai",
+  "repository": "https://github.com/sociahive/sociahive-mcp",
+  "license": "MIT",
+  "keywords": ["sociahive", "social-media", "scheduling", "automation", "instagram", "tiktok", "linkedin", "x"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "SociaHive",
+    "shortDescription": "Schedule posts, automate DMs",
+    "longDescription": "SociaHive lets you plan, schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest from a conversation. Describe an automation in plain words (for example, DM a price list to everyone who comments PRICE) and SociaHive builds it as a draft for you to review and turn on. You can also read post and automation analytics. Publishing and turning on automations always ask for your confirmation first. Requires a SociaHive account on the 7-day trial or a paid plan.",
+    "developerName": "SociaHive",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://www.sociahive.com/connect-ai",
+    "supportURL": "https://www.sociahive.com/contact",
+    "privacyPolicyURL": "https://www.sociahive.com/privacy",
+    "termsOfServiceURL": "https://www.sociahive.com/terms",
+    "defaultPrompt": [
+      "Schedule this caption to Instagram and LinkedIn for tomorrow at 9am.",
+      "When someone comments PRICE on my latest reel, DM them my price list.",
+      "How did my posts do last week?"
+    ],
+    "brandColor": "#0E0E0C",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg"
+  }
+}

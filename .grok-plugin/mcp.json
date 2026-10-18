@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sociahive": {
+      "type": "http",
+      "url": "https://www.sociahive.com/api/mcp"
+    }
+  }
+}

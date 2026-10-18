@@ -1,0 +1,26 @@
+{
+  "name": "sociahive-mcp",
+  "description": "SociaHive for AI agents: schedule posts on 9 networks, build DM and comment automations, and read analytics.",
+  "owner": {
+    "name": "SociaHive",
+    "url": "https://www.sociahive.com"
+  },
+  "plugins": [
+    {
+      "name": "sociahive",
+      "description": "Schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest, build DM and comment automations, and read analytics.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "source": { "type": "local", "path": "./" },
+      "homepage": "https://www.sociahive.com/connect-ai",
+      "keywords": [
+        "sociahive",
+        "social media scheduler",
+        "schedule social media posts",
+        "instagram dm automation",
+        "comment to dm"
+      ],
+      "domains": ["sociahive.com"]
+    }
+  ]
+}
