@@ -11,7 +11,6 @@ The MCP server itself runs on SociaHive's side and changes without a release her
 - Plugin manifests so SociaHive installs from each tool's plugin system: Claude Code (`.claude-plugin/`), Cursor (`.cursor-plugin/`), Codex (`.codex-plugin/`, `.agents/plugins/marketplace.json`), Grok Build (`.grok-plugin/`) and a Gemini CLI extension (`gemini-extension.json`, `GEMINI.md`).
 - The `sociahive` skill (`skills/sociahive/SKILL.md`, copied to the root `SKILL.md`): which MCP tool to use for which job, the CLI commands, the plan requirement and the safety rules.
 - Install steps for each tool, `npx skills add sociahive/sociahive-mcp` and `npx @sociahive/mcp add`.
-- `PUBLISHING.md`: how the repository gets listed in each marketplace.
 
 ### Changed
 
