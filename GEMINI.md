@@ -1,13 +1,21 @@
 # SociaHive
 
-This extension connects Gemini CLI to SociaHive, a social media platform for scheduling posts on 9 networks (Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky, Pinterest), running DM and comment automations, and reading analytics.
+This extension connects Gemini CLI to SociaHive: schedule and publish posts on 9 networks (Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky, Pinterest), build and run DM and comment automations, and read analytics.
 
-- The `sociahive` MCP server is at `https://www.sociahive.com/api/mcp`. On first use Gemini CLI opens a browser to sign in to SociaHive. Run `/mcp auth sociahive` to sign in again.
-- The `sociahive` skill (`skills/sociahive/SKILL.md`) lists the tools by job and the CLI commands. Read it before acting.
-- For local images and videos, CSV imports or scripts, use the `sociahive` CLI (`npm install -g sociahive`, `export SOCIAHIVE_API_KEY=sk_...`).
+Setup:
 
-Rules:
+- The `sociahive` MCP server is at `https://www.sociahive.com/api/mcp`. On first use Gemini CLI opens a browser to sign in. Run `/mcp auth sociahive` to sign in again.
+- Call `whoami` first to confirm the connection. MCP, API and CLI access need the 7-day trial or a paid plan; on the free plan every call returns "This SociaHive action was not run". Tell the user to check their plan and stop; do not retry.
+- For local files, CSV import and scripts use the CLI: `npm install -g sociahive`, `export SOCIAHIVE_API_KEY=sk_...`.
 
-- Ask the user before publishing to a live audience, turning on an automation, or anything else that cannot be undone. SociaHive asks for a confirmation on those calls; pass it only after the user agrees.
-- Automations are created as drafts for the user to review.
-- MCP and CLI access need the 7-day trial or a paid plan. On the free plan the tools answer with an upgrade link; show it to the user and stop.
+Read `skills/sociahive/SKILL.md` before acting; it has the workflows. The tool list is in `skills/sociahive/references/tools.md` and the CLI commands in `skills/sociahive/references/cli.md`.
+
+Core rules:
+
+- Name the platform and let SociaHive pick the account: `platforms: [{"platform":"instagram"}]` (X is `twitter`). Ask the user which account only when SociaHive reports `ambiguous_reference`; then pass the `id` from `list_accounts`. Never invent ids.
+- Always pass `timezone` (IANA name). `scheduledAt` takes ISO 8601 with an offset or `tomorrow 9am`, `friday 5pm`, `next monday`, `in 2 hours`.
+- `create_scheduled_post` without `scheduledAt` saves a draft; with it, the post is scheduled. Prefer scheduling.
+- Publishing now (`publish_post_now`) is irreversible: get the user's yes, then repeat the call with the `__confirmToken` from the confirmation response. CLI: `--yes` only after they agree.
+- `generate_flow` creates a draft that builds for 10 to 30 seconds. Check it with `get_flow`, show it to the user, and call `activate_flow` only after they say yes. The server does not ask for confirmation there, so you must: it replies to real people.
+- Text limits are checked on scheduling: X 280, Bluesky 300, Threads 500, Pinterest 800, Instagram and TikTok 2,200, LinkedIn 3,000. Use `platforms[].text` for a shorter caption on one network.
+- Agents cannot delete posts or flows, disconnect accounts or turn on a post's automation; send the user to the dashboard.

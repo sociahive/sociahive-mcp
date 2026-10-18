@@ -15,7 +15,7 @@
   "interface": {
     "displayName": "SociaHive",
     "shortDescription": "Schedule posts, automate DMs",
-    "longDescription": "SociaHive lets you plan, schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest from a conversation. Describe an automation in plain words (for example, DM a price list to everyone who comments PRICE) and SociaHive builds it as a draft for you to review and turn on. You can also read post and automation analytics. Publishing and turning on automations always ask for your confirmation first. Requires a SociaHive account on the 7-day trial or a paid plan.",
+    "longDescription": "SociaHive lets you plan, schedule and publish posts to Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest from a conversation. Describe an automation in plain words (for example, DM a price list to everyone who comments PRICE) and SociaHive builds it as a draft for you to review and turn on. You can also read post and automation analytics. Publishing now asks for your confirmation, and automations are created as drafts that the agent checks with you before turning on. Requires a SociaHive account on the 7-day trial or a paid plan.",
     "developerName": "SociaHive",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
