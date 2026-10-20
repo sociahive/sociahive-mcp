@@ -22,6 +22,9 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the `id` f
 | `get_published_media` | One live item by the platform's media id. | `mediaId`, `accountId` | accounts:read |
 | `search_published_media` | Semantic search over live captions. Counts as expensive. | `query`, `mediaType`, `limit`, `accountId` | accounts:read |
 | `upload_media_from_url` | Copy a public JPEG, PNG, WebP, MP4 or MOV into SociaHive; returns `url`, `mediaType`. 30 per hour. | `url` | uploads:write |
+| `list_account_destinations` | Channels, communities, blogs or lists inside one account (Telegram, Slack, Lemmy, Tumblr, Dev.to, Hashnode, WordPress, Listmonk, Dribbble). Pass the id as `metadata.destination_id` on that target; `input` checks one the user named. | `accountId`, `input`, `fresh` | posts:read |
+| `list_media` | The user's media library (earlier uploads), newest first. | `kind`, `tag`, `query`, `limit`, `cursor` | posts:read |
+| `generate_post_image` | 1 to 4 AI images from a description or the caption. Studio, Pro and Agency; monthly allowance. | `prompt` or `caption`, `aspect`, `count` | uploads:write |
 | `list_pinterest_boards` | Boards of each connected Pinterest account. A Pin is saved to a board: pass the chosen board's `id` as `metadata.boardId` on the Pinterest target. An account with one board needs no `boardId`. | `accountId` | posts:read |
 
 The four published-media tools need `accountId` when the user has several accounts.
@@ -30,9 +33,10 @@ The four published-media tools need `accountId` when the user has several accoun
 
 | Tool | Purpose | Key args | Scope | Confirm |
 |---|---|---|---|---|
-| `create_scheduled_post` | New post. No `scheduledAt` = draft, with it = scheduled. | `text`, `platforms[]` (`platform`, optional `accountId`, `contentType` `carousel`, per-target `text`, `media`), `media[]` (`type`, `url`, `altText`), `scheduledAt`, `timezone` | posts:write | no |
+| `create_scheduled_post` | New post. No `scheduledAt` = draft, with it = scheduled; `nextSlot: true` takes the next free posting slot. | `text`, `platforms[]` (`platform`, optional `accountId`, `contentType` `carousel`, per-target `text`, `media`, `metadata`, `article`, `detached`), `media[]` (`type`, `url`, `altText`, `coverUrl`, `coverTimeMs`), `scheduledAt` or `nextSlot`, `timezone`, `signatureId` | posts:write | no |
 | `schedule_post` | Schedule an existing draft; can attach a comment automation (left off). | `postId` or `postName`, `scheduledAt`, `timezone`, `attach_automation` (one of `keyword`+`link`, `prompt`, `template_id`+`inputs`; optional `accountId`) | posts:write (+ flows:write when attaching) | no |
-| `update_scheduled_post` | Edit or reschedule a draft or scheduled post. Media replaces all. | `postId` or `postName`, `text`, `media`, `scheduledAt`, `timezone` | posts:write | no |
+| `update_scheduled_post` | Edit or reschedule a draft or scheduled post. Media replaces all. | `postId` or `postName`, `text`, `media`, `scheduledAt`, `timezone`, `signatureId`, `detachedPlatforms`, `articles` | posts:write | no |
+| `duplicate_scheduled_post` | Copy a post as a new draft (text, media, channels, options, tags). | `postId` or `postName` | posts:write | no |
 | `cancel_scheduled_post` | Scheduled to draft. Idempotent. | `postId` or `postName` | posts:write | no |
 | `bulk_reschedule_posts` | Move up to 50 posts; per-post failures are listed. | `postIds[]`, `scheduledAt`, `timezone` | posts:write | no |
 | `publish_post_now` | Publish immediately. Irreversible. | `postId` or `postName` | posts:write | yes |
@@ -41,6 +45,16 @@ The four published-media tools need `accountId` when the user has several accoun
 | `get_scheduled_post` | One post with per-target status and its automation. | `postId` | posts:read | no |
 | `get_scheduler_calendar` | Posts in a date range, 200 max. | `fromDate`, `toDate` (ISO), `platform` | posts:read | no |
 | `add_to_evergreen`, `list_evergreen` | Queue of recyclable captions that fills gaps in the calendar. | `text`, `sourcePostId` | posts:write / posts:read | no |
+| `find_next_slot` | Next free posting slot for these accounts (next 60 days); held 10 minutes. | `accountIds`, `after` | posts:read | no |
+| `manage_posting_slots` | List, add, change or remove weekly posting times per account. | `action`, `slotId`, `accountIds`, `weekday`, `time`, `timezone` | posts:write | no |
+| `list_signatures`, `create_signature` | Saved sign-offs appended when a post publishes; use the id as `signatureId` (`"none"` for no signature). | `name`, `text`, `accountIds`, `isDefault` | posts:read / posts:write | no |
+| `list_rss_feeds`, `update_rss_feed` | RSS feeds (up to 5) and how each item becomes a post: draft, AI draft, or AI-written and scheduled into the next slot. Pause, resume or change mode, instructions, tone, accounts, daily cap. | `feedId`, `paused`, `mode`, `instructions`, `tone`, `accountIds` | posts:read / posts:write | no |
+| `get_post_link_clicks` | Clicks on a post's short links. | `postId` | posts:read | no |
+| `arm_plug`, `list_plugs` | When a post reaches a number of likes, comments, reposts or views on an account, repost it (X) or add a comment (X, Instagram, Facebook), once. Paid plans. | `postId`, `accountId`, `metric`, `threshold`, `action`, `text` | posts:write / posts:read | yes (`arm_plug`) |
+| `create_review_link`, `list_review_links` | Send a post to a client for approval; read what they said. Studio, Pro and Agency. | `postId` or `postName`, `reviewerName` | posts:write / posts:read | yes (`create_review_link`) |
+| `create_client_invite`, `list_client_invites` | A link a client opens to connect their own accounts into one of the user's account groups. Studio, Pro and Agency. Needs `accounts:write` (a custom key, or an OAuth client that requests it). | `groupId` or `groupName`, `platforms`, `maxAccounts` | accounts:write / accounts:read | yes (`create_client_invite`) |
+
+A tool the user's plan does not include fails with `feature_disabled`.
 
 `scheduledAt` accepts ISO 8601 or `tomorrow 9am`, `friday 5pm`, `next monday`, `in 2 hours`, resolved in `timezone` (UTC if omitted).
 
@@ -94,7 +108,7 @@ Not available on one-click Connect keys. Broadcasts, sequences, landing pages, w
 
 ## Not available to agents
 
-Deleting posts or flows, disconnecting accounts, exporting collected lead values, removing a post's automation, arming a post's automation ("turn on when this post goes live"), Autopilot. If asked, say it is done in the SociaHive dashboard.
+Deleting posts or flows, disconnecting accounts, exporting collected lead values, removing a post's automation, arming a post's automation ("turn on when this post goes live"). If asked, say it is done in the SociaHive dashboard.
 
 ## MCP resources
 

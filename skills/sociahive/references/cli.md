@@ -18,12 +18,14 @@ sociahive whoami
 sociahive capabilities
 sociahive accounts list
 sociahive accounts capabilities [--account-id <id>]
+sociahive accounts destinations <accountId> [--fresh] [--check "<destination>"]
 
 sociahive upload <file> [<file> ...]          # JPEG, PNG, WebP, MP4, MOV; prints hosted URLs
 sociahive posts create (--text "..." | --text-file <path>) \
   --platforms '[{"platform":"instagram"},{"platform":"linkedin","text":"own caption"}]' \
   [--scheduled-at "2026-11-03T09:00:00-05:00"] [--timezone America/New_York] \
-  [--media '[{"type":"image","url":"https://..."}]'] [--media-file <path> ...] [--content-type carousel]
+  [--media '[{"type":"image","url":"https://..."}]'] [--media-file <path> ...] [--content-type carousel] \
+  [--next-slot] [--signature <id|none>] [--alt "..." ...] [--video-cover <url|ms> ...] [--detached <platform> ...]
 sociahive posts list [--status draft|scheduled|published|failed|all] [--platform <p>] [--limit <n>]
 sociahive posts get <id>
 sociahive posts update <id> [--text "..." | --text-file <path>] [--media '[]'] [--scheduled-at "..."]
@@ -33,6 +35,26 @@ sociahive posts schedule <id> --at "2026-11-03T09:00:00-05:00" [--timezone <iana
 sociahive posts cancel <id>
 sociahive posts publish <id> --yes            # irreversible; only after the user agreed
 sociahive posts import <file.csv>             # drafts only
+sociahive posts duplicate <id>                # copy as a new draft
+sociahive posts clicks <id>                   # short-link clicks
+sociahive posts review-link <id> [--for "<client name>"] --yes   # Studio, Pro, Agency
+sociahive posts review-links <id>
+
+sociahive slots list [--accounts <id,id>]
+sociahive slots add --accounts <id,id> --weekday mon --time 09:30 [--timezone Europe/Berlin]
+sociahive slots remove <slotId>
+sociahive slots next --accounts <id,id> [--after <ISO time>]
+sociahive signatures list
+sociahive signatures add --name "..." --text "..." [--account <accountId> ...] [--default]
+sociahive media list [--kind image|video] [--tag <tag>] [--search <text>]
+sociahive media generate (--prompt "..." | --caption "...") [--aspect square|portrait|landscape] [--count 1-4]   # Studio, Pro, Agency
+sociahive rss list
+sociahive rss pause <feedId>
+sociahive rss resume <feedId>
+sociahive plugs list <postId>
+sociahive plugs add <postId> --metric likes|comments|reposts|views --threshold <n> --action repost|comment [--text "..."] [--account-id <id>] --yes
+sociahive clients invite <group id or name> [--platforms instagram,facebook] [--max 5] --yes   # Studio, Pro, Agency
+sociahive clients invites [--group <group id or name>]
 
 sociahive flows generate --description "..." [--platform instagram]
 sociahive flows bulk-generate --description "..." [--account-id <id>] --yes
@@ -52,7 +74,7 @@ sociahive evergreen list
 sociahive evergreen add --text "Caption to recycle"
 ```
 
-`posts create` needs `--platforms` as a JSON array; `accountId` inside a target is optional (the server picks the account; pass it only to choose between several). Per-target keys: `platform`, `accountId`, `text`, `media`, `contentType` (`carousel` for Instagram).
+`posts create` needs `--platforms` as a JSON array; `accountId` inside a target is optional (the server picks the account; pass it only to choose between several). Per-target keys: `platform`, `accountId`, `text`, `media`, `contentType` (`carousel` for Instagram), `metadata` (`destination_id` from `accounts destinations`), `article` (Dev.to, Hashnode, WordPress, Listmonk).
 
 ## CSV for `posts import`
 

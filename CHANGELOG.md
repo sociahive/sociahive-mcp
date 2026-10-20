@@ -4,6 +4,20 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.0] - 2026-10-20
+
+### Added
+
+- The skill and tool catalog cover the scheduler tools now open to customers: posting slots (`find_next_slot`, `manage_posting_slots`, `nextSlot`), signatures, the media library, alt text and video covers, duplicate a post, short-link clicks, RSS feeds written by AI, plugs, and on Studio, Pro and Agency AI images, client review links and client invite links.
+- The 13 newer networks (Telegram, Discord, Slack, Mastodon, Lemmy, Tumblr, Dev.to, Hashnode, WordPress, Listmonk, Dribbble, Twitch, Kick), with destinations (`list_account_destinations`) and articles.
+- Pinterest boards: `list_pinterest_boards` and `metadata.boardId`.
+- README links to the Node and Python SDKs and the n8n node.
+
+### Changed
+
+- 22 networks instead of 9 in the descriptions of every manifest and in `server.json` (1.0.2).
+- The setup wizard note: `npx @sociahive/mcp add` now covers Codex and Gemini CLI.
+
 ## [1.0.0] - 2026-10-18
 
 ### Added
@@ -26,4 +40,5 @@ First public version of this repository, before it had a release tag.
 - `server.json`: the MCP registry manifest for `com.sociahive/sociahive`, a streamable HTTP remote at `https://www.sociahive.com/api/mcp`.
 - A README with setup for Claude Code, Claude, Cursor and other MCP clients, and the safety model (scoped API keys, confirmation before publishing now, automations created as drafts).
 
+[1.1.0]: https://github.com/sociahive/sociahive-mcp/releases/tag/v1.1.0
 [1.0.0]: https://github.com/sociahive/sociahive-mcp/releases/tag/v1.0.0

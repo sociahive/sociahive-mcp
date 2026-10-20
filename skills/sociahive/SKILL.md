@@ -1,13 +1,13 @@
 ---
 name: sociahive
-description: Operates a user's SociaHive account through MCP tools or the sociahive CLI. Schedules, drafts, reschedules and publishes posts on Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky and Pinterest; uploads media; builds and turns on DM and comment automations (comment-to-DM, keyword replies, lead capture) on Instagram, Facebook, Messenger, WhatsApp and Telegram; imports posts from CSV; reads post, automation and content analytics. Use when the user asks to post, schedule or plan social content, attach a comment automation to a post, turn comments into DMs, build an auto-reply or chatbot flow, collect leads, bulk import posts, or check what is working. Needs a SociaHive account on the 7-day trial or a paid plan.
+description: Operates a user's SociaHive account through MCP tools or the sociahive CLI. Schedules, drafts, reschedules and publishes posts on 22 networks (Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky, Pinterest, Telegram, Discord, Slack, Mastodon, Tumblr, WordPress and more), into weekly posting slots; uploads media; builds and turns on DM and comment automations (comment-to-DM, keyword replies, lead capture) on Instagram, Facebook, Messenger, WhatsApp and Telegram; imports posts from CSV; reads post, automation and content analytics. Use when the user asks to post, schedule or plan social content, attach a comment automation to a post, turn comments into DMs, build an auto-reply or chatbot flow, collect leads, bulk import posts, or check what is working. Needs a SociaHive account on the 7-day trial or a paid plan.
 homepage: https://www.sociahive.com/connect-ai
 allowed-tools: Bash(sociahive:*)
 ---
 
 # SociaHive
 
-SociaHive schedules posts on 9 networks, runs DM and comment automations, and reports what works. Drive it with MCP tools when they are connected; use the `sociahive` CLI for local files, CSV import and scripts.
+SociaHive schedules posts on 22 networks, runs DM and comment automations, and reports what works. Drive it with MCP tools when they are connected; use the `sociahive` CLI for local files, CSV import and scripts.
 
 Full tool list: [references/tools.md](references/tools.md). CLI commands and flags: [references/cli.md](references/cli.md).
 
@@ -15,7 +15,7 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 
 1. MCP endpoint: `https://www.sociahive.com/api/mcp` (streamable HTTP). Clients that support OAuth 2.1 (Claude, ChatGPT, Codex, Cursor, Gemini CLI) sign in on first use: the first call returns 401 and a SociaHive sign-in page opens. Others (Grok, custom agents) send an API key (`X-API-Key: sk_...` or `Authorization: Bearer sk_...`).
 2. Call `whoami` first. It confirms the connection and returns the tier. If SociaHive tools are not listed, ask the user to connect SociaHive (https://www.sociahive.com/connect-ai) or use the CLI.
-3. CLI: `npm install -g sociahive`, then `export SOCIAHIVE_API_KEY=sk_...` (Settings, API keys; needs `agent:execute`). Check with `sociahive whoami`. Never print the key or write it to files.
+3. CLI: `npm install -g sociahive` (or `npx sociahive`), then `export SOCIAHIVE_API_KEY=sk_...` (Settings, API keys; needs `agent:execute`). Check with `sociahive whoami`. Never print the key or write it to files.
 4. Plan: MCP, API and CLI need the 7-day trial or a paid plan. On the free plan the tool list still loads, but every call returns an error result starting "This SociaHive action was not run". Nothing ran. Tell the user to check their SociaHive plan and stop; do not retry.
 
 ## Which tool for which request
@@ -29,7 +29,15 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 | Un-schedule a post | `cancel_scheduled_post` (returns it to draft) |
 | Post right now | `create_scheduled_post` (no time), then `publish_post_now` after the user agrees |
 | What is planned | `list_scheduled_posts`, `get_scheduler_calendar` |
-| Image or video from a URL for a post | `upload_media_from_url` |
+| Next free time ("post it in my next slot") | `create_scheduled_post` with `nextSlot: true`; `find_next_slot` to read it; `manage_posting_slots` to set weekly times |
+| Image or video from a URL for a post | `upload_media_from_url`; earlier uploads: `list_media` |
+| AI image for a post (Studio, Pro, Agency) | `generate_post_image` |
+| Sign-off on posts | `list_signatures`, `create_signature`, then `signatureId` |
+| Copy a post | `duplicate_scheduled_post` |
+| Client approval or client connects accounts (Studio, Pro, Agency) | `create_review_link`, `list_review_links`; `create_client_invite`, `list_client_invites` |
+| Repost or comment once a post takes off (paid plans) | `arm_plug`, `list_plugs` |
+| Clicks on a post's links | `get_post_link_clicks` |
+| RSS feeds that write posts | `list_rss_feeds`, `update_rss_feed` |
 | Local file, CSV, loops | CLI: `sociahive upload`, `posts import` |
 | Comment automation tied to a new post | `schedule_post` with `attach_automation` |
 | Automation from a description | `generate_flow`, then `activate_flow` after the user agrees |
@@ -39,9 +47,11 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 
 ## Rules that apply to every task
 
-**Confirmation.** Publishing to a live audience cannot be undone. `publish_post_now` (and `publish`, `generate_multiple_flows`, `create_broadcast`, `create_sequence`) first return `{"__mcp_envelope":"pending_confirmation","confirmToken":...,"summary":...}`. Show the user the summary, wait for a clear yes, then call again with the same arguments plus `"__confirmToken": "<token>"`. The token is single use and expires in 5 minutes. In the CLI add `--yes` only after the user agreed. `activate_flow` has no confirmation step, so you must ask first: it makes the automation reply to real people.
+**Confirmation.** Publishing to a live audience cannot be undone. `publish_post_now` (and `publish`, `create_review_link`, `create_client_invite`, `arm_plug`, `generate_multiple_flows`, `create_broadcast`, `create_sequence`) first return `{"__mcp_envelope":"pending_confirmation","confirmToken":...,"summary":...}`. Show the user the summary, wait for a clear yes, then call again with the same arguments plus `"__confirmToken": "<token>"`. The token is single use and expires in 5 minutes. In the CLI add `--yes` only after the user agreed. `activate_flow` has no confirmation step, so you must ask first: it makes the automation reply to real people.
 
-**Platform ids** for `platforms[].platform` and filters: `instagram`, `facebook`, `twitter` (this is X), `linkedin`, `threads`, `tiktok`, `youtube`, `bluesky`, `pinterest`. Flows use only `instagram`, `whatsapp`, `messenger`, `telegram`.
+**Platform ids** for `platforms[].platform` and filters: `instagram`, `facebook`, `twitter` (this is X), `linkedin`, `threads`, `tiktok`, `youtube`, `bluesky`, `pinterest`, `telegram`, `discord`, `slack`, `mastodon`, `lemmy`, `tumblr`, `devto`, `hashnode`, `wordpress`, `listmonk`, `dribbble`, `twitch`, `kick`. Flows use only `instagram`, `whatsapp`, `messenger`, `telegram`.
+
+**Destinations and articles.** Telegram, Slack, Lemmy, Tumblr, Dev.to, Hashnode, WordPress, Listmonk and Dribbble post to a channel, community, blog or list inside the account: get its id with `list_account_destinations {"accountId":"..."}` (`input` checks one the user named) and set `metadata.destination_id` on that target. Dev.to, Hashnode, WordPress and Listmonk are articles: pass `article` (`title`, Markdown `body`, optional `canonicalUrl`, `coverImage`, `tags`) on the target. The server says which part is missing.
 
 **Accounts.** Name the platform and let the server pick the account: `platforms: [{"platform":"instagram"}]`. Do not call `list_accounts` first. If the user has several accounts on a platform you get `ambiguous_reference` with the handles; ask which, then pass `accountId` (the `id` field of `list_accounts`, 24 hex characters; never the `platformUserId` or a @handle). `generate_flow`, `create_automation` and the published-media tools need `accountId` when the user has more than one account; without it they return `no_account_selected`. Never invent an id.
 
@@ -49,9 +59,9 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 
 **Draft, scheduled, now.** `create_scheduled_post` without `scheduledAt` saves a draft; with it the post is scheduled. There is no create-and-publish call. Prefer scheduling; publish now only when the user says now. A blanket "just do it, don't ask me anything" does not replace the confirmation: still show the one-line summary (text, networks) and get a yes before the `__confirmToken` call. If the user's text is over a network's limit, show the shortened version for that target before using it; never cut their words silently.
 
-**Limits are checked when a post is scheduled or published, not when a draft is saved.** Text per target: X 280, Bluesky 300, Threads 500, Pinterest 800, Instagram and TikTok 2,200, LinkedIn 3,000, YouTube 5,000, Facebook 63,206. Use `platforms[].text` for a shorter caption on one network instead of cutting the main text.
+**Limits are checked when a post is scheduled or published, not when a draft is saved.** Text per target: X 280, Bluesky 300, Threads, Twitch and Kick 500, Pinterest 800, Discord 2,000, Instagram and TikTok 2,200, LinkedIn 3,000, Slack 4,000, Telegram 4,096 (1,024 with media), YouTube 5,000, Facebook 63,206. Use `platforms[].text` for a shorter caption on one network instead of cutting the main text.
 
-**Media.** `media: [{"type":"image"|"video","url":"https://..."}]`, public https URLs or URLs from `upload_media_from_url` or `sociahive upload`. Instagram posts need media (ask for it before drafting one; scheduling fails without it); a carousel is `contentType: "carousel"` on the Instagram target with 2 to 10 items. X takes up to 4 images or 1 video, not both. Bluesky 4 images or 1 video. YouTube needs a video (first line of the text is the title). TikTok needs media. Pinterest needs an image and a board: call `list_pinterest_boards` and set `metadata.boardId` on the Pinterest target (not needed when the account has only one board). Instagram Reels and Stories are not available to normal accounts yet: do not set `contentType` to `reels` or `stories`. X is a paid-plan feature.
+**Media.** `media: [{"type":"image"|"video","url":"https://..."}]`, public https URLs or URLs from `upload_media_from_url` or `sociahive upload`. Add `altText` to an image, and `coverUrl` (or `coverTimeMs`) to a video for its cover. Instagram posts need media (ask for it before drafting one; scheduling fails without it); a carousel is `contentType: "carousel"` on the Instagram target with 2 to 10 items. X takes up to 4 images or 1 video, not both. Bluesky 4 images or 1 video. YouTube needs a video (first line of the text is the title). TikTok needs media. Pinterest needs an image and a board: call `list_pinterest_boards` and set `metadata.boardId` on the Pinterest target (not needed when the account has only one board). Instagram Reels and Stories are not available to normal accounts yet: do not set `contentType` to `reels` or `stories`. X is a paid-plan feature. A feature the user's plan does not include fails with `feature_disabled`: tell the user which plan has it; do not retry.
 
 **Deleting.** The agent cannot delete posts or flows or disconnect accounts. Offer `cancel_scheduled_post` or `deactivate_flow`, or send the user to the dashboard.
 

@@ -25,7 +25,7 @@
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-Hosted remote [MCP](https://modelcontextprotocol.io) server, skill and plugins for [SociaHive](https://www.sociahive.com). Schedule and publish posts on 9 networks, build DM and comment automations, and read analytics from Claude Code, Codex, Gemini CLI, Cursor, Grok, Claude, ChatGPT or any MCP client.
+Hosted remote [MCP](https://modelcontextprotocol.io) server, skill and plugins for [SociaHive](https://www.sociahive.com). Schedule and publish posts on 22 networks, build DM and comment automations, and read analytics from Claude Code, Codex, Gemini CLI, Cursor, Grok, Claude, ChatGPT or any MCP client.
 
 **Endpoint:** `https://www.sociahive.com/api/mcp` (streamable HTTP). Sign in with OAuth 2.1 on first use, or send an API key (`X-API-Key: sk_...` or `Authorization: Bearer sk_...`).
 
@@ -57,8 +57,11 @@ MCP, API key and CLI access are part of the 7-day trial and every paid plan.
   <a href="https://www.sociahive.com/features/content-scheduler"><img src="https://raw.githubusercontent.com/sociahive/.github/main/assets/platforms/tiktok.svg" alt="TikTok" title="TikTok" width="28"></a>&nbsp;&nbsp;
   <a href="https://www.sociahive.com/features/content-scheduler"><img src="https://raw.githubusercontent.com/sociahive/.github/main/assets/platforms/youtube.svg" alt="YouTube" title="YouTube" width="28"></a>&nbsp;&nbsp;
   <a href="https://www.sociahive.com/features/content-scheduler"><img src="https://raw.githubusercontent.com/sociahive/.github/main/assets/platforms/bluesky.svg" alt="Bluesky" title="Bluesky" width="28"></a>&nbsp;&nbsp;
-  <a href="https://www.sociahive.com/features/content-scheduler"><img src="https://raw.githubusercontent.com/sociahive/.github/main/assets/platforms/pinterest.svg" alt="Pinterest" title="Pinterest" width="28"></a>
+  <a href="https://www.sociahive.com/features/content-scheduler"><img src="https://raw.githubusercontent.com/sociahive/.github/main/assets/platforms/pinterest.svg" alt="Pinterest" title="Pinterest" width="28"></a>&nbsp;&nbsp;
+  <a href="https://www.sociahive.com/features/content-scheduler"><img src="https://raw.githubusercontent.com/sociahive/.github/main/assets/platforms/telegram.svg" alt="Telegram" title="Telegram" width="28"></a>
 </p>
+
+<p align="center">Also Discord, Slack, Mastodon, Lemmy, Tumblr, Dev.to, Hashnode, WordPress, Listmonk, Dribbble, Twitch and Kick.</p>
 
 ### Automate DMs and comments on
 
@@ -78,7 +81,8 @@ MCP, API key and CLI access are part of the 7-day trial and every paid plan.
 
 ## What it can do
 
-- **Scheduling:** `create_scheduled_post`, `schedule_post`, `publish_post_now`, `get_scheduler_calendar`, `bulk_reschedule_posts`, `upload_media_from_url`
+- **Scheduling:** `create_scheduled_post`, `schedule_post`, `publish_post_now`, `get_scheduler_calendar`, `bulk_reschedule_posts`, `duplicate_scheduled_post`, `upload_media_from_url`, `list_media`
+- **Scheduler extras:** posting slots (`find_next_slot`, `manage_posting_slots`), signatures, RSS feeds written by AI, short-link clicks, plugs (`arm_plug`), and on Studio, Pro and Agency AI images (`generate_post_image`), client review links and client invite links
 - **DM and comment automation:** `generate_flow` (describe an automation in plain words, get a reviewable draft), `generate_multiple_flows`, `create_automation`, `activate_flow`, `list_flows_with_stats`, step-level editing
 - **Analytics:** `get_post_analytics`, `get_analytics_overview`, `get_flow_stats`, `get_content_insights`
 - **Leads and growth:** `capture_lead`, `get_collected_data`, `create_broadcast`, `create_sequence`, `create_growth_widget`, `get_pixel_embed`
@@ -157,7 +161,7 @@ npx skills add sociahive/sociahive-mcp
 npx @sociahive/mcp add
 ```
 
-The wizard detects your agents and writes their MCP config. The published version covers the clients it lists today; Codex and Gemini CLI support arrives with the next release, so use the commands above for them for now.
+The wizard detects your agents (Claude Code, Codex, Gemini CLI, Cursor, VS Code, Windsurf, Claude Desktop) and writes their MCP config.
 
 ### Agent frameworks
 
@@ -192,6 +196,8 @@ The same jobs from the CLI:
 | Draft an automation | `sociahive flows generate --description "DM my price list when someone comments PRICE"` |
 | Turn an automation on or off | `sociahive flows activate <id>`, `sociahive flows deactivate <id>` |
 | What works for this account | `sociahive insights --weeks 8` |
+| Next free posting slot | `sociahive slots next --accounts <id>` |
+| Send a post to a client for approval | `sociahive posts review-link <id>` |
 
 ## The CLI
 
@@ -205,7 +211,13 @@ sociahive flows generate --description "DM my price list when someone comments P
 sociahive insights --weeks 8
 ```
 
-Run `sociahive --help` or `sociahive <command> --help` for every option. The full command list is in [`SKILL.md`](SKILL.md).
+Run `sociahive --help` or `sociahive <command> --help` for every option. The full command list is in [`references/cli.md`](skills/sociahive/references/cli.md).
+
+## SDKs and workflow tools
+
+- Node.js: `npm install @sociahive/sdk` ([sociahive/sociahive-node](https://github.com/sociahive/sociahive-node))
+- Python: `pip install sociahive` ([sociahive/sociahive-python](https://github.com/sociahive/sociahive-python))
+- n8n: install the community node `n8n-nodes-sociahive` ([sociahive/n8n-nodes-sociahive](https://github.com/sociahive/n8n-nodes-sociahive))
 
 ## Safety
 
