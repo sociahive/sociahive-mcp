@@ -22,6 +22,7 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the `id` f
 | `get_published_media` | One live item by the platform's media id. | `mediaId`, `accountId` | accounts:read |
 | `search_published_media` | Semantic search over live captions. Counts as expensive. | `query`, `mediaType`, `limit`, `accountId` | accounts:read |
 | `upload_media_from_url` | Copy a public JPEG, PNG, WebP, MP4 or MOV into SociaHive; returns `url`, `mediaType`. 30 per hour. | `url` | uploads:write |
+| `list_pinterest_boards` | Boards of each connected Pinterest account. A Pin is saved to a board: pass the chosen board's `id` as `metadata.boardId` on the Pinterest target. An account with one board needs no `boardId`. | `accountId` | posts:read |
 
 The four published-media tools need `accountId` when the user has several accounts.
 
