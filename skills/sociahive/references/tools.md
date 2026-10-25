@@ -21,10 +21,10 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the `id` f
 | `get_latest_published_media` | The single newest live post or reel ("my latest reel"). | `mediaType`, `accountId` | accounts:read |
 | `get_published_media` | One live item by the platform's media id. | `mediaId`, `accountId` | accounts:read |
 | `search_published_media` | Semantic search over live captions. Counts as expensive. | `query`, `mediaType`, `limit`, `accountId` | accounts:read |
-| `upload_media_from_url` | Copy a public JPEG, PNG, WebP, MP4 or MOV into SociaHive; returns `url`, `mediaType`. 30 per hour. | `url` | uploads:write |
+| `upload_media_from_url` | Copy a JPEG, PNG, WebP, MP4 or MOV into SociaHive from a public URL, or in ChatGPT from a file in the conversation; returns `url`, `mediaType`. 30 per hour. | `url` or `file` (ChatGPT) | uploads:write |
 | `list_account_destinations` | Channels, communities, blogs or lists inside one account (Telegram, Slack, Lemmy, Tumblr, Dev.to, Hashnode, WordPress, Listmonk, Dribbble). Pass the id as `metadata.destination_id` on that target; `input` checks one the user named. | `accountId`, `input`, `fresh` | posts:read |
 | `list_media` | The user's media library (earlier uploads), newest first. | `kind`, `tag`, `query`, `limit`, `cursor` | posts:read |
-| `generate_post_image` | 1 to 4 AI images from a description or the caption. Studio, Pro and Agency; monthly allowance. | `prompt` or `caption`, `aspect`, `count` | uploads:write |
+| `generate_post_image` | 1 to 4 AI images from a description or the caption. Studio, Pro and Agency; 5 AI credits per image. Too few credits fails with `credits_exhausted`: tell the user how many are needed, do not retry. | `prompt` or `caption`, `aspect`, `count` | uploads:write |
 | `list_pinterest_boards` | Boards of each connected Pinterest account. A Pin is saved to a board: pass the chosen board's `id` as `metadata.boardId` on the Pinterest target. An account with one board needs no `boardId`. | `accountId` | posts:read |
 
 The four published-media tools need `accountId` when the user has several accounts.
