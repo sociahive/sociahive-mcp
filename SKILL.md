@@ -30,8 +30,8 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 | Post right now | `create_scheduled_post` (no time), then `publish_post_now` after the user agrees |
 | What is planned | `list_scheduled_posts`, `get_scheduler_calendar` |
 | Next free time ("post it in my next slot") | `create_scheduled_post` with `nextSlot: true`; `find_next_slot` to read it; `manage_posting_slots` to set weekly times |
-| Image or video from a URL for a post | `upload_media_from_url`; earlier uploads: `list_media` |
-| AI image for a post (Studio, Pro, Agency) | `generate_post_image` |
+| Image or video for a post (from a URL, or in ChatGPT an image from the conversation) | `upload_media_from_url`; earlier uploads: `list_media` |
+| AI image for a post (Studio, Pro, Agency; 5 AI credits each) | `generate_post_image` |
 | Sign-off on posts | `list_signatures`, `create_signature`, then `signatureId` |
 | Copy a post | `duplicate_scheduled_post` |
 | Client approval or client connects accounts (Studio, Pro, Agency) | `create_review_link`, `list_review_links`; `create_client_invite`, `list_client_invites` |
@@ -72,7 +72,7 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 ### 1. Schedule a post to several networks
 
 "Post this to Instagram and LinkedIn next Tuesday at 9am" (image at a URL, user is in New York).
-1. If the image URL is not already public https or you want it hosted: `upload_media_from_url {"url":"https://..."}` returns `url` and `mediaType`.
+1. If the image URL is not already public https or you want it hosted: `upload_media_from_url {"url":"https://..."}` returns `url` and `mediaType`. In ChatGPT, an image in the conversation (one ChatGPT made or the user attached) goes in as `upload_media_from_url {"file": <that image>}`; ChatGPT fills in the file object.
 2. `create_scheduled_post {"text":"...","media":[{"type":"image","url":"<url>"}],"platforms":[{"platform":"instagram"},{"platform":"linkedin","text":"LinkedIn version"}],"scheduledAt":"next tuesday 9am","timezone":"America/New_York"}`.
 3. Read back `status: "scheduled"` and `scheduledAt`, and tell the user the local time. Report per-target errors (`TEXT_TOO_LONG` names the target) and fix only that target.
 

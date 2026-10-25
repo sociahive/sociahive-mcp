@@ -4,6 +4,13 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.1] - 2026-10-25
+
+### Changed
+
+- AI images (`generate_post_image`) cost 5 AI credits each instead of counting against a monthly allowance; running out fails with `credits_exhausted`.
+- `upload_media_from_url` also takes `file`: in ChatGPT, an image from the conversation, including one ChatGPT made.
+
 ## [1.1.0] - 2026-10-20
 
 ### Added
