@@ -108,6 +108,8 @@ For a post that is already live, use workflow 5 and describe which post it liste
 
 Instagram rules to keep when you edit by hand: in a comment-to-DM flow the first DM is one message only, and Instagram only lets a business message someone inside its 24 hour messaging window (a comment opens it).
 
+**Follow check ("Ask to follow").** If the user wants the link or reward only for people who follow the account, pass `"allowFollowGate": true` to `generate_flow` and say so in the description ("only send the link to people who follow me"). It works on Instagram only. The flow asks the person to follow and tap "I followed", Instagram confirms the follow, and only then does the `followed` branch run. Add it only when the user asked for it: Instagram discourages pushing people to follow. People who have never messaged the account can't be checked before that first tap; that's Instagram's rule, not a bug. To add one to an existing Instagram draft: `add_node {"flowId":"<id>","type":"follow_gate","position":{"x":0,"y":0},"allowFollowGate":true}`, then connect each output once: `add_edge {"flowId":"<id>","source":"<the new node id>","target":"<the step that gives the reward>","sourceHandle":"followed"}`, and the same with `"sourceHandle":"not_followed"` for people who don't follow. After a comment trigger the follow step must come right after the trigger. Its messages and number of tries are the product defaults; the user changes them in the flow editor.
+
 ### 6. Find what works and plan next week
 
 1. `get_content_insights {"weeks":8}` (1 to 12): which formats, weekdays and pillars beat the account's own average, with sample sizes. Ignore small samples and say when data is insufficient.

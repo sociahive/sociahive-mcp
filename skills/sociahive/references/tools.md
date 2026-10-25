@@ -75,7 +75,7 @@ Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs
 
 | Tool | Purpose | Key args | Scope | Confirm |
 |---|---|---|---|---|
-| `generate_flow` | Build a draft from a description, in the background (10 to 30 s). Expensive bucket. | `description` (10 to 2,000 chars), `platform`, `accountId`, `businessContext`, `variants` (1 to 3), `iterateOnFlowId` (rebuilds a flow the AI made and nobody edited) | flows:write | no |
+| `generate_flow` | Build a draft from a description, in the background (10 to 30 s). Expensive bucket. | `description` (10 to 2,000 chars), `platform`, `accountId`, `businessContext`, `variants` (1 to 3), `iterateOnFlowId` (rebuilds a flow the AI made and nobody edited), `allowFollowGate` (Instagram: only people who follow get the reward; pass it only when the user asked) | flows:write | no |
 | `create_automation` | Draft from an outcome sentence, returns a plain-language preview. Never goes live. | `outcome`, `accountId` | flows:write | no |
 | `generate_multiple_flows` | Rebuild a whole setup (up to 10 drafts), for example migrating from another tool. Starter plan and up. | `description`, `accountId` | flows:write | yes |
 | `create_flow` | Empty draft to build node by node. | `name`, `accountId`, `platformUserId`, `platform`, `trigger` | flows:write | no |
@@ -86,7 +86,7 @@ Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs
 | `list_system_templates` | Ready-made automation templates. | `category`, `limit`, `cursor` | flows:read | no |
 | `update_flow` | Rename or change description. | `flowId` or `flowName`, `name`, `description` | flows:write | no |
 | `update_node` | Change one step. Merges, never replaces. Rejects flows that are on. | `flowName`, `nodeId` (id or label), `text`, `link`, `keywords`, `data`, `name` | flows:write | no |
-| `add_node`, `delete_node`, `add_edge`, `delete_edge` | Edit the graph of a draft. | `flowId`, `type`, `data`, `source`, `target`, `nodeId`, `edgeId` | flows:write | no |
+| `add_node`, `delete_node`, `add_edge`, `delete_edge` | Edit the graph of a draft. `add_node` can add a `follow_gate` (with `allowFollowGate: true`, Instagram only); connect its `followed` / `not_followed` outputs with `add_edge`. | `flowId`, `type`, `position`, `data`, `allowFollowGate`, `source`, `target`, `sourceHandle`, `nodeId`, `edgeId` | flows:write | no |
 | `duplicate_flow` | Copy to a new draft (the way to edit a live flow). | `flowName`, `newName` | flows:write | no |
 | `bulk_update_flows` | Edit up to 50 flows at once. | `flowIds`, `filter`, `patch` | flows:write | no |
 | `activate_flow` | Turn a flow on. Runs the same checks as the Turn on button: placeholders, plan, keyword conflicts (returned as `warnings`). | `flowName` or `flowId` | flows:write | no, ask the user |
@@ -103,7 +103,7 @@ Not available on one-click Connect keys. Broadcasts, sequences, landing pages, w
 | `create_landing_page`, `create_growth_widget` | Disabled drafts the user enables in SociaHive. | growth_tools:write | yes |
 | `create_ref_url` | Tracked link for a flow. | growth_tools:write | no |
 | `get_pixel_embed` | Pixel install snippet. | analytics:read | no |
-| `search_tags`, `list_tags`, `create_tag`, `find_references` | Contact tags. | tags:read, tags:write | no |
+| `search_tags`, `create_tag`, `find_references` | Contact tags. | tags:read, tags:write | no |
 | `capture_lead`, `resolve` | Record a lead; answer a support conversation from the knowledge base. | accounts:write | no |
 
 ## Not available to agents

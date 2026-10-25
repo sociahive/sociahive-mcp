@@ -9,7 +9,7 @@
     {
       "name": "sociahive",
       "description": "Schedule and publish posts to 22 networks (Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky, Pinterest, Telegram, Discord, Slack and more), build DM and comment automations, and read analytics.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "productivity",
       "source": { "type": "local", "path": "./" },
       "homepage": "https://www.sociahive.com/connect-ai",

@@ -4,6 +4,16 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.2] - 2026-10-25
+
+### Added
+
+- The follow check: `generate_flow` and `add_node` take `allowFollowGate` to build an Instagram "Ask to follow" step, so only people who follow the account get the reward. Workflow 5 explains when to use it.
+
+### Removed
+
+- `list_tags` from the tool catalog: the server does not offer it. Use `search_tags`.
+
 ## [1.1.1] - 2026-10-25
 
 ### Changed
