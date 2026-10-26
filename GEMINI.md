@@ -12,7 +12,7 @@ Read `skills/sociahive/SKILL.md` before acting; it has the workflows. The tool l
 
 Core rules:
 
-- Name the platform and let SociaHive pick the account: `platforms: [{"platform":"instagram"}]` (X is `twitter`). Ask the user which account only when SociaHive reports `ambiguous_reference`; then pass the `id` from `list_accounts`. Never invent ids.
+- Name the platform and let SociaHive pick the account: `platforms: [{"platform":"instagram"}]` (X is `twitter`). When the user names an account (@acme), pass that handle as `accountId`. If SociaHive says it isn't connected or several fit, ask the user which, then retry. Never invent ids, and tell the user the account in `actedOnAccount`.
 - Always pass `timezone` (IANA name). `scheduledAt` takes ISO 8601 with an offset or `tomorrow 9am`, `friday 5pm`, `next monday`, `in 2 hours`.
 - `create_scheduled_post` without `scheduledAt` saves a draft; with it, the post is scheduled. Prefer scheduling.
 - Publishing now (`publish_post_now`) is irreversible: get the user's yes, then repeat the call with the `__confirmToken` from the confirmation response. CLI: `--yes` only after they agree.

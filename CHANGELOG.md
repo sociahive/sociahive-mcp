@@ -4,6 +4,12 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.3] - 2026-10-26
+
+### Changed
+
+- Accounts: when the user names an account, pass its @handle as `accountId` on any tool, including `platforms[].accountId`. A handle that isn't connected, or one that fits several accounts, comes back with the connected accounts so you can ask the user. Results include `actedOnAccount`, the account actually used.
+
 ## [1.1.2] - 2026-10-25
 
 ### Added

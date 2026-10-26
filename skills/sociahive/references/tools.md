@@ -2,7 +2,7 @@
 
 Tools a normal paid or trial account can call over MCP. `scope` is the API key scope; one-click Connect keys and OAuth sign-in carry `agent:execute`, `accounts:read`, `posts:read`, `posts:write`, `flows:read`, `flows:write`, `analytics:read`, `templates:read`, `uploads:write`. Tools needing another scope work only with a custom API key (Settings, API keys).
 
-Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the `id` from `list_accounts`. Where a tool accepts `postName` or `flowName` (the caption's opening words, the flow's name), use it instead of looking an id up. Rate limits: read 120/min, write 30/min, expensive 5/min, 1,000/day.
+Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the account's @handle or its `id` from `list_accounts`. Where a tool accepts `postName` or `flowName` (the caption's opening words, the flow's name), use it instead of looking an id up. Rate limits: read 120/min, write 30/min, expensive 5/min, 1,000/day.
 
 ## Session
 
@@ -27,7 +27,7 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the `id` f
 | `generate_post_image` | 1 to 4 AI images from a description or the caption. Studio, Pro and Agency; 5 AI credits per image. Too few credits fails with `credits_exhausted`: tell the user how many are needed, do not retry. | `prompt` or `caption`, `aspect`, `count` | uploads:write |
 | `list_pinterest_boards` | Boards of each connected Pinterest account. A Pin is saved to a board: pass the chosen board's `id` as `metadata.boardId` on the Pinterest target. An account with one board needs no `boardId`. | `accountId` | posts:read |
 
-The four published-media tools need `accountId` when the user has several accounts.
+The four published-media tools need `accountId` (a @handle or id) when the user has several accounts.
 
 ## Posts and scheduling
 
