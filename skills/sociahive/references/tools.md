@@ -45,12 +45,13 @@ The four published-media tools need `accountId` (a @handle or id) when the user 
 | `get_scheduled_post` | One post with per-target status and its automation. | `postId` | posts:read | no |
 | `get_scheduler_calendar` | Posts in a date range, 200 max. | `fromDate`, `toDate` (ISO), `platform` | posts:read | no |
 | `add_to_evergreen`, `list_evergreen` | Queue of recyclable captions that fills gaps in the calendar. | `text`, `sourcePostId` | posts:write / posts:read | no |
-| `find_next_slot` | Next free posting slot for these accounts (next 60 days); held 10 minutes. | `accountIds`, `after` | posts:read | no |
-| `manage_posting_slots` | List, add, change or remove weekly posting times per account. | `action`, `slotId`, `accountIds`, `weekday`, `time`, `timezone` | posts:write | no |
+| `find_next_slot` | Next free posting slot for these accounts (next 60 days). Read only; holds nothing. | `accountIds`, `after` | posts:read | no |
+| `list_posting_slots` | Weekly posting times per account. | `accountIds` | posts:read | no |
+| `add_posting_slot`, `update_posting_slot`, `delete_posting_slot` | Add, change or delete a weekly posting time. | `slotId`, `accountIds`, `weekday`, `time`, `timezone` | posts:write | no |
 | `list_signatures`, `create_signature` | Saved sign-offs appended when a post publishes; use the id as `signatureId` (`"none"` for no signature). | `name`, `text`, `accountIds`, `isDefault` | posts:read / posts:write | no |
 | `list_rss_feeds`, `update_rss_feed` | RSS feeds (up to 5) and how each item becomes a post: draft, AI draft, or AI-written and scheduled into the next slot. Pause, resume or change mode, instructions, tone, accounts, daily cap. | `feedId`, `paused`, `mode`, `instructions`, `tone`, `accountIds` | posts:read / posts:write | no |
 | `get_post_link_clicks` | Clicks on a post's short links. | `postId` | posts:read | no |
-| `arm_plug`, `list_plugs` | When a post reaches a number of likes, comments, reposts or views on an account, repost it (X) or add a comment (X, Instagram, Facebook), once. Paid plans. | `postId`, `accountId`, `metric`, `threshold`, `action`, `text` | posts:write / posts:read | yes (`arm_plug`) |
+| `add_post_milestone_action`, `list_post_milestone_actions` | When a post reaches a number of likes, comments, reposts or views on an account, repost it (X) or add a comment (X, Instagram, Facebook), once. Paid plans. | `postId`, `accountId`, `metric`, `threshold`, `action`, `text` | posts:write / posts:read | yes (`add_post_milestone_action`) |
 | `create_review_link`, `list_review_links` | Send a post to a client for approval; read what they said. Studio, Pro and Agency. | `postId` or `postName`, `reviewerName` | posts:write / posts:read | yes (`create_review_link`) |
 | `create_client_invite`, `list_client_invites` | A link a client opens to connect their own accounts into one of the user's account groups. Studio, Pro and Agency. Needs `accounts:write` (a custom key, or an OAuth client that requests it). | `groupId` or `groupName`, `platforms`, `maxAccounts` | accounts:write / accounts:read | yes (`create_client_invite`) |
 

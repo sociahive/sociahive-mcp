@@ -82,7 +82,7 @@ MCP, API key and CLI access are part of the 7-day trial and every paid plan.
 ## What it can do
 
 - **Scheduling:** `create_scheduled_post`, `schedule_post`, `publish_post_now`, `get_scheduler_calendar`, `bulk_reschedule_posts`, `duplicate_scheduled_post`, `upload_media_from_url`, `list_media`
-- **Scheduler extras:** posting slots (`find_next_slot`, `manage_posting_slots`), signatures, RSS feeds written by AI, short-link clicks, plugs (`arm_plug`), and on Studio, Pro and Agency AI images (`generate_post_image`, 5 AI credits each), client review links and client invite links
+- **Scheduler extras:** posting slots (`find_next_slot`, `add_posting_slot` and friends), signatures, RSS feeds written by AI, short-link clicks, plugs (`add_post_milestone_action`), and on Studio, Pro and Agency AI images (`generate_post_image`, 5 AI credits each), client review links and client invite links
 - **DM and comment automation:** `generate_flow` (describe an automation in plain words, get a reviewable draft), `generate_multiple_flows`, `create_automation`, `activate_flow`, `list_flows_with_stats`, step-level editing
 - **Analytics:** `get_post_analytics`, `get_analytics_overview`, `get_flow_stats`, `get_content_insights`
 - **Leads and growth:** `capture_lead`, `get_collected_data`, `create_broadcast`, `create_sequence`, `create_growth_widget`, `get_pixel_embed`

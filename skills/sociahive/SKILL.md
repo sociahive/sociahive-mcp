@@ -29,13 +29,13 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 | Un-schedule a post | `cancel_scheduled_post` (returns it to draft) |
 | Post right now | `create_scheduled_post` (no time), then `publish_post_now` after the user agrees |
 | What is planned | `list_scheduled_posts`, `get_scheduler_calendar` |
-| Next free time ("post it in my next slot") | `create_scheduled_post` with `nextSlot: true`; `find_next_slot` to read it; `manage_posting_slots` to set weekly times |
+| Next free time ("post it in my next slot") | `create_scheduled_post` with `nextSlot: true`; `find_next_slot` to read it; `list_posting_slots`, `add_posting_slot`, `update_posting_slot`, `delete_posting_slot` to set weekly times |
 | Image or video for a post (from a URL, or in ChatGPT an image from the conversation) | `upload_media_from_url`; earlier uploads: `list_media` |
 | AI image for a post (Studio, Pro, Agency; 5 AI credits each) | `generate_post_image` |
 | Sign-off on posts | `list_signatures`, `create_signature`, then `signatureId` |
 | Copy a post | `duplicate_scheduled_post` |
 | Client approval or client connects accounts (Studio, Pro, Agency) | `create_review_link`, `list_review_links`; `create_client_invite`, `list_client_invites` |
-| Repost or comment once a post takes off (paid plans) | `arm_plug`, `list_plugs` |
+| Repost or comment once a post takes off (paid plans) | `add_post_milestone_action`, `list_post_milestone_actions` |
 | Clicks on a post's links | `get_post_link_clicks` |
 | RSS feeds that write posts | `list_rss_feeds`, `update_rss_feed` |
 | Local file, CSV, loops | CLI: `sociahive upload`, `posts import` |
@@ -47,7 +47,7 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 
 ## Rules that apply to every task
 
-**Confirmation.** Publishing to a live audience cannot be undone. `publish_post_now` (and `publish`, `create_review_link`, `create_client_invite`, `arm_plug`, `generate_multiple_flows`, `create_broadcast`, `create_sequence`) first return `{"__mcp_envelope":"pending_confirmation","confirmToken":...,"summary":...}`. Show the user the summary, wait for a clear yes, then call again with the same arguments plus `"__confirmToken": "<token>"`. The token is single use and expires in 5 minutes. In the CLI add `--yes` only after the user agreed. `activate_flow` has no confirmation step, so you must ask first: it makes the automation reply to real people.
+**Confirmation.** Publishing to a live audience cannot be undone. `publish_post_now` (and `publish`, `create_review_link`, `create_client_invite`, `add_post_milestone_action`, `generate_multiple_flows`, `create_broadcast`, `create_sequence`) first return `{"__mcp_envelope":"pending_confirmation","confirmToken":...,"summary":...}`. Show the user the summary, wait for a clear yes, then call again with the same arguments plus `"__confirmToken": "<token>"`. The token is single use and expires in 5 minutes. In the CLI add `--yes` only after the user agreed. `activate_flow` has no confirmation step, so you must ask first: it makes the automation reply to real people.
 
 **Platform ids** for `platforms[].platform` and filters: `instagram`, `facebook`, `twitter` (this is X), `linkedin`, `threads`, `tiktok`, `youtube`, `bluesky`, `pinterest`, `telegram`, `discord`, `slack`, `mastodon`, `lemmy`, `tumblr`, `devto`, `hashnode`, `wordpress`, `listmonk`, `dribbble`, `twitch`, `kick`. Flows use only `instagram`, `whatsapp`, `messenger`, `telegram`.
 

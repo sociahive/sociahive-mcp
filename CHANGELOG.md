@@ -4,6 +4,13 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.4] - 2026-10-27
+
+### Changed
+
+- Tool names updated to match the MCP server: `list_plugs` is now `list_post_milestone_actions` and `arm_plug` is now `add_post_milestone_action`; `manage_posting_slots` is replaced by `list_posting_slots`, `add_posting_slot`, `update_posting_slot` and `delete_posting_slot`.
+- `find_next_slot` no longer holds the slot it returns.
+
 ## [1.1.3] - 2026-10-26
 
 ### Changed
