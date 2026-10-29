@@ -42,6 +42,7 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 | Comment automation tied to a new post | `schedule_post` with `attach_automation` |
 | Automation from a description | `generate_flow`, then `activate_flow` after the user agrees |
 | Find or edit an existing automation | `list_flows`, `search_flows`, `get_flow`, `update_node` |
+| Connect a button or branch to a step | `get_flow` (each step's `outputs`), then `add_edge` with `sourceHandle` (handle or button label); `update_edge` to re-route, `delete_edge` to remove |
 | Which reel or post is live on Instagram | `get_latest_published_media`, `list_published_media`, `search_published_media` |
 | Performance | `get_analytics_overview`, `get_post_analytics`, `get_content_insights`, `get_flow_stats` |
 

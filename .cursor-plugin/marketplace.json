@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "SociaHive for AI agents: schedule posts on 22 networks, build DM and comment automations, and read analytics.",
-    "version": "1.1.5"
+    "version": "1.1.6"
   },
   "plugins": [
     {
       "name": "sociahive",
       "source": "./",
-      "version": "1.1.5",
+      "version": "1.1.6",
       "description": "Schedule and publish posts to 22 networks (Instagram, TikTok, X, LinkedIn, Facebook, Threads, YouTube, Bluesky, Pinterest, Telegram, Discord, Slack and more), build DM and comment automations, and read analytics.",
       "author": {
         "name": "SociaHive"

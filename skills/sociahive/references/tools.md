@@ -35,6 +35,7 @@ The four published-media tools need `accountId` (a @handle or id) when the user 
 |---|---|---|---|---|
 | `create_scheduled_post` | New post. No `scheduledAt` = draft, with it = scheduled; `nextSlot: true` takes the next free posting slot. | `text`, `platforms[]` (`platform`, optional `accountId`, `contentType` `carousel`, per-target `text`, `media`, `metadata`, `article`, `detached`), `media[]` (`type`, `url`, `altText`, `coverUrl`, `coverTimeMs`), `scheduledAt` or `nextSlot`, `timezone`, `signatureId` | posts:write | no |
 | `schedule_post` | Schedule an existing draft; can attach a comment automation (left off). | `postId` or `postName`, `scheduledAt`, `timezone`, `attach_automation` (one of `keyword`+`link`, `prompt`, `template_id`+`inputs`; optional `accountId`) | posts:write (+ flows:write when attaching) | no |
+| `arm_post_automation` | Make the comment automation attached to a scheduled post go live with the post. The first call returns a summary and a `contentHash`; after the user agrees, call again with `confirm: true` and that `contentHash`. | `postId` or `postName`, `confirm`, `contentHash` | posts:write, flows:write | yes, two calls |
 | `update_scheduled_post` | Edit or reschedule a draft or scheduled post. Media replaces all. | `postId` or `postName`, `text`, `media`, `scheduledAt`, `timezone`, `signatureId`, `detachedPlatforms`, `articles` | posts:write | no |
 | `duplicate_scheduled_post` | Copy a post as a new draft (text, media, channels, options, tags). | `postId` or `postName` | posts:write | no |
 | `cancel_scheduled_post` | Scheduled to draft. Idempotent. | `postId` or `postName` | posts:write | no |
@@ -84,12 +85,13 @@ Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs
 | `create_flow` | Empty draft to build node by node. | `name`, `accountId`, `platformUserId`, `platform`, `trigger` | flows:write | no |
 | `list_flows` | Browse flows. | `status`, `limit`, `sortBy`, `sortOrder`, `cursor` | flows:read | no |
 | `search_flows` | Find a flow by name. | `query`, `limit`, `accountId` | flows:read | no |
-| `get_flow` | One flow with nodes and edges (`nodeId` for one node). | `flowId` | flows:read | no |
+| `get_flow` | One flow with nodes and edges (`nodeId` for one node). Each step lists its `outputs` (handle, label, where it leads); each edge has an `id`. | `flowId` | flows:read | no |
 | `summarize_flow_purpose` | One sentence about a flow. | `flowId` | flows:read | no |
 | `list_system_templates` | Ready-made automation templates. | `category`, `limit`, `cursor` | flows:read | no |
 | `update_flow` | Rename or change description. | `flowId` or `flowName`, `name`, `description` | flows:write | no |
 | `update_node` | Change one step. Merges, never replaces. Rejects flows that are on. | `flowName`, `nodeId` (id or label), `text`, `link`, `keywords`, `data`, `name` | flows:write | no |
-| `add_node`, `delete_node`, `add_edge`, `delete_edge` | Edit the graph of a draft. `add_node` can add a `follow_gate` (with `allowFollowGate: true`, Instagram only); connect its `followed` / `not_followed` outputs with `add_edge`. | `flowId`, `type`, `position`, `data`, `allowFollowGate`, `source`, `target`, `sourceHandle`, `nodeId`, `edgeId` | flows:write | no |
+| `add_node`, `delete_node` | Add or remove a step of a draft. `add_node` can add a `follow_gate` (with `allowFollowGate: true`, Instagram only). | `flowId` or `flowName`, `type`, `position`, `data`, `allowFollowGate`, `nodeId` | flows:write | no |
+| `add_edge`, `update_edge`, `delete_edge` | Connect, re-route or remove a connection of a draft. Name the output in `sourceHandle` by handle (`button-0`, `yes`, `followed`) or by button label; leave it out for a step's plain next output. One connection per button or branch: use `update_edge` to send it elsewhere. A wrong output is refused with the list of valid ones. | `flowId` or `flowName`, `source`, `target`, `sourceHandle`, `edgeId`, `newTarget` | flows:write | no |
 | `duplicate_flow` | Copy to a new draft (edit a live flow while it keeps running). | `flowName`, `newName` | flows:write | no |
 | `bulk_update_flows` | Edit up to 50 flows at once. | `flowIds`, `filter`, `patch` | flows:write | no |
 | `activate_flow` | Turn a flow on. Runs the same checks as the Turn on button: placeholders, plan, keyword conflicts (returned as `warnings`). | `flowName` or `flowId` | flows:write | no, ask the user |

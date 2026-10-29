@@ -4,6 +4,17 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.6] - 2026-10-29
+
+### Added
+
+- `update_edge`: send a button or branch to another step without deleting it.
+- `arm_post_automation`: make the comment automation attached to a scheduled post go live with the post, after the user agrees.
+
+### Changed
+
+- Connections are named by output. `add_edge` takes a button's handle or label in `sourceHandle` and refuses an output the step doesn't have; `delete_edge` can name the connection by step and output; `get_flow` lists each step's outputs and each edge's id. The graph tools take `flowName` as well as `flowId`.
+
 ## [1.1.5] - 2026-10-29
 
 ### Added
