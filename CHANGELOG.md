@@ -4,6 +4,17 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.5] - 2026-10-29
+
+### Added
+
+- Delete and restore: `delete_flow`, `delete_scheduled_post`, `bulk_delete_scheduled_posts`, `restore_flow` and `restore_scheduled_post`, each after a confirmation. Connected AI apps can delete up to 50 items a day.
+
+### Changed
+
+- Broadcast, sequence, growth-tool and tag tools work on Connect keys and OAuth sign-in. Reconnect an app connected before 2026-10-29 to get them.
+- Editing a live flow: turn it off, edit, turn it on again, or edit a copy while it keeps running.
+
 ## [1.1.4] - 2026-10-27
 
 ### Changed

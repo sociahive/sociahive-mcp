@@ -38,6 +38,8 @@ The four published-media tools need `accountId` (a @handle or id) when the user 
 | `update_scheduled_post` | Edit or reschedule a draft or scheduled post. Media replaces all. | `postId` or `postName`, `text`, `media`, `scheduledAt`, `timezone`, `signatureId`, `detachedPlatforms`, `articles` | posts:write | no |
 | `duplicate_scheduled_post` | Copy a post as a new draft (text, media, channels, options, tags). | `postId` or `postName` | posts:write | no |
 | `cancel_scheduled_post` | Scheduled to draft. Idempotent. | `postId` or `postName` | posts:write | no |
+| `delete_scheduled_post`, `bulk_delete_scheduled_posts` | Delete one post, or up to 50 at once. AI apps: 50 deletes a day. | `postId` or `postName`; `postIds[]` | posts:write, agent:destructive | yes |
+| `restore_scheduled_post` | Bring a deleted post back; a scheduled one comes back as a draft. | `postId` or `postName` | posts:write, agent:destructive | yes |
 | `bulk_reschedule_posts` | Move up to 50 posts; per-post failures are listed. | `postIds[]`, `scheduledAt`, `timezone` | posts:write | no |
 | `publish_post_now` | Publish immediately. Irreversible. | `postId` or `postName` | posts:write | yes |
 | `publish` | Same outcome as `publish_post_now`; prefer that one. | `postId`, `platforms` | posts:write | yes |
@@ -88,15 +90,19 @@ Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs
 | `update_flow` | Rename or change description. | `flowId` or `flowName`, `name`, `description` | flows:write | no |
 | `update_node` | Change one step. Merges, never replaces. Rejects flows that are on. | `flowName`, `nodeId` (id or label), `text`, `link`, `keywords`, `data`, `name` | flows:write | no |
 | `add_node`, `delete_node`, `add_edge`, `delete_edge` | Edit the graph of a draft. `add_node` can add a `follow_gate` (with `allowFollowGate: true`, Instagram only); connect its `followed` / `not_followed` outputs with `add_edge`. | `flowId`, `type`, `position`, `data`, `allowFollowGate`, `source`, `target`, `sourceHandle`, `nodeId`, `edgeId` | flows:write | no |
-| `duplicate_flow` | Copy to a new draft (the way to edit a live flow). | `flowName`, `newName` | flows:write | no |
+| `duplicate_flow` | Copy to a new draft (edit a live flow while it keeps running). | `flowName`, `newName` | flows:write | no |
 | `bulk_update_flows` | Edit up to 50 flows at once. | `flowIds`, `filter`, `patch` | flows:write | no |
 | `activate_flow` | Turn a flow on. Runs the same checks as the Turn on button: placeholders, plan, keyword conflicts (returned as `warnings`). | `flowName` or `flowId` | flows:write | no, ask the user |
 | `deactivate_flow` | Turn a flow off. | `flowName` or `flowId` | flows:write | no |
 | `get_flow_revisions`, `revert_flow_to_version` | History and undo for a flow. | `flowId`, `targetVersion` | flows:read / flows:write | no |
+| `delete_flow` | Move a flow to the trash (30 days). | `flowName` or `flowId` | flows:write, agent:destructive | yes |
+| `restore_flow` | Bring a flow back from the trash as a draft. | `flowName` or `flowId` | flows:write, agent:destructive | yes |
 
-## Custom API key only
+A live flow can't be edited. To change it in place: `deactivate_flow`, edit, then `activate_flow` (it answers nobody while it is off). To keep it running: `duplicate_flow`, edit the copy, `activate_flow` the copy, then `deactivate_flow` the original. `get_flow` reports `build.status` while a flow is still being built; edits wait until it is `ready`.
 
-Not available on one-click Connect keys. Broadcasts, sequences, landing pages, widgets, ref links and tags need an API key carrying the matching scope (OAuth sign-in cannot grant those scopes); `capture_lead` and `resolve` need `accounts:write` (a custom key, or an OAuth client that requests it). Several also need a Starter plan or higher. Do not suggest them unless the user asked for the feature.
+## Contacts and growth tools
+
+Broadcasts, sequences, landing pages, widgets, ref links and tags work on Connect keys and OAuth sign-in (an app connected before 2026-10-29 must reconnect to get these scopes). `capture_lead` and `resolve` need `accounts:write` (a custom key, or an OAuth client that requests it). Several also need a Starter plan or higher. Do not suggest them unless the user asked for the feature.
 
 | Tool | Purpose | Scope | Confirm |
 |---|---|---|---|
@@ -109,7 +115,7 @@ Not available on one-click Connect keys. Broadcasts, sequences, landing pages, w
 
 ## Not available to agents
 
-Deleting posts or flows, disconnecting accounts, exporting collected lead values, removing a post's automation, arming a post's automation ("turn on when this post goes live"). If asked, say it is done in the SociaHive dashboard.
+Disconnecting accounts, exporting collected lead values, removing a post's automation, arming a post's automation ("turn on when this post goes live"). If asked, say it is done in the SociaHive dashboard.
 
 ## MCP resources
 
