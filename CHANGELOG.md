@@ -4,6 +4,12 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.7] - 2026-10-30
+
+### Added
+
+- `request_media_upload` and `finalize_media_upload`: upload a file that has no public URL, such as a local file or one in a private Google Drive. The agent sends the file itself with `PUT`, so it needs to be able to run code.
+
 ## [1.1.6] - 2026-10-29
 
 ### Added

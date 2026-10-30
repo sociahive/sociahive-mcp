@@ -31,6 +31,7 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 | What is planned | `list_scheduled_posts`, `get_scheduler_calendar` |
 | Next free time ("post it in my next slot") | `create_scheduled_post` with `nextSlot: true`; `find_next_slot` to read it; `list_posting_slots`, `add_posting_slot`, `update_posting_slot`, `delete_posting_slot` to set weekly times |
 | Image or video for a post (from a URL, or in ChatGPT an image from the conversation) | `upload_media_from_url`; earlier uploads: `list_media` |
+| Local file or one in a private Google Drive, from an agent that can run code | `request_media_upload`, `PUT` the bytes with the returned headers, then `finalize_media_upload` |
 | AI image for a post (Studio, Pro, Agency; 5 AI credits each) | `generate_post_image` |
 | Sign-off on posts | `list_signatures`, `create_signature`, then `signatureId` |
 | Copy a post | `duplicate_scheduled_post` |
