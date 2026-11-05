@@ -8,8 +8,8 @@ The MCP server itself runs on SociaHive's side and changes without a release her
 
 ### Changed
 
-- `list_flows` now also finds a flow by name (`query`) and ranks flows by performance (`includeStats`, `metric`). It replaces `search_flows` and `list_flows_with_stats`.
-- `list_published_media` now also returns the newest item (`latest`), one item by id (`id`) and caption search results (`query`). It replaces `get_latest_published_media`, `get_published_media` and `search_published_media`.
+- `list_flows` takes a `mode`: `search` finds a flow by name (`query`), `rank` ranks flows by performance (`metric`). It replaces `search_flows` and `list_flows_with_stats`.
+- `list_published_media` takes a `mode`: `latest` returns the newest item, `id` one item by id (`id`), `search` caption search results (`query`). It replaces `get_latest_published_media`, `get_published_media` and `search_published_media`.
 - The replaced tools still answer by name, so existing scripts keep working, but they are no longer in the tool list.
 
 ## [1.1.7] - 2026-10-30

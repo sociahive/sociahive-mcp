@@ -42,9 +42,9 @@ Full tool list: [references/tools.md](references/tools.md). CLI commands and fla
 | Local file, CSV, loops | CLI: `sociahive upload`, `posts import` |
 | Comment automation tied to a new post | `schedule_post` with `attach_automation` |
 | Automation from a description | `generate_flow`, then `activate_flow` after the user agrees |
-| Find or edit an existing automation | `list_flows` (`query` finds one by name), `get_flow`, `update_node` |
+| Find or edit an existing automation | `list_flows` (`mode: "search"` finds one by name), `get_flow`, `update_node` |
 | Connect a button or branch to a step | `get_flow` (each step's `outputs`), then `add_edge` with `sourceHandle` (handle or button label); `update_edge` to re-route, `delete_edge` to remove |
-| Which reel or post is live on Instagram | `list_published_media` (`latest: true` for the newest, `id` for one, `query` to search captions) |
+| Which reel or post is live on Instagram | `list_published_media` (`mode`: `latest` for the newest, `id` for one, `search` for captions) |
 | Performance | `get_analytics_overview`, `get_post_analytics`, `get_content_insights`, `get_flow_stats` |
 
 ## Rules that apply to every task
