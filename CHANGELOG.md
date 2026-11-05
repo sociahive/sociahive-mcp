@@ -4,6 +4,14 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.8] - 2026-11-04
+
+### Changed
+
+- `list_flows` now also finds a flow by name (`query`) and ranks flows by performance (`includeStats`, `metric`). It replaces `search_flows` and `list_flows_with_stats`.
+- `list_published_media` now also returns the newest item (`latest`), one item by id (`id`) and caption search results (`query`). It replaces `get_latest_published_media`, `get_published_media` and `search_published_media`.
+- The replaced tools still answer by name, so existing scripts keep working, but they are no longer in the tool list.
+
 ## [1.1.7] - 2026-10-30
 
 ### Added
