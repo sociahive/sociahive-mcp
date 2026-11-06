@@ -83,9 +83,12 @@ MCP, API key and CLI access are part of the 7-day trial and every paid plan.
 
 - **Scheduling:** `create_scheduled_post`, `schedule_post`, `publish_post_now`, `get_scheduler_calendar`, `bulk_reschedule_posts`, `duplicate_scheduled_post`, `upload_media_from_url`, `list_media`
 - **Scheduler extras:** posting slots (`find_next_slot`, `add_posting_slot` and friends), signatures, RSS feeds written by AI, short-link clicks, plugs (`add_post_milestone_action`), and on Studio, Pro and Agency AI images (`generate_post_image`, 5 AI credits each), client review links and client invite links
-- **DM and comment automation:** `generate_flow` (describe an automation in plain words, get a reviewable draft), `generate_multiple_flows`, `create_automation`, `activate_flow`, `list_flows` (search and ranking by performance), step-level editing
+- **DM and comment automation:** `generate_flow` (describe an automation in plain words, get a reviewable draft), `generate_multiple_flows`, `create_automation`, `activate_flow`, `list_flows` (search and ranking by performance), step-level editing; edits to a live automation wait as unpublished changes until `publish_flow_changes` (or `discard_flow_changes`)
+- **Delete and restore:** `delete_scheduled_post`, `bulk_delete_scheduled_posts` and `delete_flow` after a confirmation; `restore_scheduled_post` and `restore_flow` bring them back (deleted flows stay in the trash for 30 days)
 - **Analytics:** `get_post_analytics`, `get_analytics_overview`, `get_flow_stats`, `get_content_insights`
-- **Leads and growth:** `capture_lead`, `get_collected_data`, `create_broadcast`, `create_sequence`, `create_growth_widget`, `get_pixel_embed`
+- **Leads and growth:** `capture_lead`, `get_collected_data`, `create_broadcast`, `create_sequence`, `create_growth_widget`, `create_ref_url`, `get_pixel_embed`
+
+Tools come in groups. Claude Code starts with the `core` group plus `list_toolsets` and `enable_toolset`, and loads another group when a request needs it; other clients get every tool. Add `?toolsets=a,b` to the server URL (or `?toolsets=all`) to choose.
 
 ## Install
 
@@ -178,7 +181,7 @@ Things to ask your AI tool once SociaHive is connected:
 | "What's on my calendar next week?" | `get_scheduler_calendar` |
 | "Move all of Friday's posts to Monday." | `bulk_reschedule_posts` |
 | "When someone comments PRICE on my latest reel, DM them my price list." | `generate_flow` |
-| "Turn that automation on." | `activate_flow` (your AI tool should check with you first) |
+| "Turn that automation on." | `activate_flow` (asks you to confirm first) |
 | "How did my posts do this month?" | `get_analytics_overview`, `get_post_analytics` |
 | "What kind of content works best for me?" | `get_content_insights` |
 | "How many emails has my lead magnet collected?" | `get_collected_data` |
@@ -194,7 +197,7 @@ The same jobs from the CLI:
 | Import posts from a CSV (as drafts) | `sociahive posts import posts.csv` |
 | See what is scheduled | `sociahive posts list --status scheduled` |
 | Draft an automation | `sociahive flows generate --description "DM my price list when someone comments PRICE"` |
-| Turn an automation on or off | `sociahive flows activate <id>`, `sociahive flows deactivate <id>` |
+| Turn an automation on or off | `sociahive flows activate <id> --yes`, `sociahive flows deactivate <id>` |
 | What works for this account | `sociahive insights --weeks 8` |
 | Next free posting slot | `sociahive slots next --accounts <id>` |
 | Send a post to a client for approval | `sociahive posts review-link <id>` |
@@ -222,8 +225,9 @@ Run `sociahive --help` or `sociahive <command> --help` for every option. The ful
 ## Safety
 
 - API keys are scoped (`posts:read`, `posts:write`, `flows:write`, `analytics:read`, ...); a read-only key can never publish. OAuth sign-in offers read-only access.
-- Publishing now and other irreversible or bulk actions ask for confirmation: nothing goes live until a second, confirming call.
-- Automations are created as drafts. The skill tells your AI tool to check with you before turning one on; that is an instruction to the agent, not a server-side lock, so review what it built.
+- Publishing now, turning an automation on, importing a file from a URL, deleting and other irreversible or bulk actions ask for confirmation: nothing happens until a second, confirming call. With an API key, turning an automation on and importing a file from a URL also take `confirm: true` in one call.
+- Automations are created as drafts. Edits to a live automation reach people only after `publish_flow_changes`.
+- Deleting needs the `agent:destructive` permission, which one-click Connect keys don't have. Deleted posts and flows can be restored.
 - X posting is available on paid plans only.
 
 ## Data and permissions
