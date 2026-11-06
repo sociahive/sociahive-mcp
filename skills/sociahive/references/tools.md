@@ -10,6 +10,10 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the accoun
 |---|---|---|---|
 | `whoami` | Signed-in user, tier, plan limits. Call first. | none | none |
 | `list_capabilities` | Tools this key can call. | none | none |
+| `list_toolsets` | Tool groups this connection can load, their tools, and which are loaded. Listed only in clients that start with the `core` group (Claude Code). | none | none |
+| `enable_toolset` | Load one tool group and return its tools. Its description lists the groups this account can load. Listed only with `list_toolsets`. | `name` | none |
+
+Tool groups: `core`, `flows-advanced`, `scheduler-advanced`, `media`, `analytics`, `growth`, `agency`, `admin-bulk` (the delete tools). Clients that start with `core` load the others with `enable_toolset`; every other client gets all tools. `?toolsets=a,b` on the server URL or the `X-MCP-Toolsets: a,b` header picks groups when connecting; `?toolsets=all` gives every tool. A tool that is not listed can still be called by name.
 
 ## Accounts and media
 
@@ -18,7 +22,7 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the accoun
 | `list_accounts` | Connected accounts with `id`, `platform`, `username`, `status` (`connected`, `needs_reauth`, ...). Use only when asked what is connected, or to resolve `ambiguous_reference`. | `platform`, `status` | accounts:read |
 | `get_capabilities` | What each account can do (automation vs scheduling). | `accountId` | accounts:read |
 | `list_published_media` | Posts and reels live on the platform (Instagram first), newest first. `mode`: `latest` (only the newest, "my latest reel"), `id` (one item by the platform's media id in `id`), `search` (captions by meaning, `query`). | `mode`, `id`, `query`, `mediaType`, `limit`, `accountId` | accounts:read |
-| `upload_media_from_url` | Copy a JPEG, PNG, WebP, MP4 or MOV into SociaHive from a public URL, or in ChatGPT from a file in the conversation; returns `url`, `mediaType`. 30 per hour. | `url` or `file` (ChatGPT) | uploads:write |
+| `upload_media_from_url` | Copy a JPEG, PNG, WebP, MP4 or MOV into SociaHive from a public URL, or in ChatGPT from a file in the conversation; returns `url`, `mediaType`. A PDF is accepted for a file in a flow message, never as post media. Asks for confirmation showing the whole URL; with an API key, `confirm: true` runs it in one call. 30 per hour. | `url` or `file` (ChatGPT), `confirm` | uploads:write |
 | `request_media_upload` | Start direct uploads of files that have no public URL (on this computer, or in a private Google Drive): one file as `fileName`, `mimeType`, `sizeBytes` (exact), or up to 25 as `files`. Returns `uploadId`, `uploadUrl` for an HTTP `PUT` (valid 15 minutes) and `headers` per file; with `files`, `uploads` in input order plus `errors` (`index`, `reason`, `retriable`) for refused files and `status` `ok` or `partial`. Needs a client that can run code to send each file with its own `PUT` (`curl --upload-file FILE -H "Name: value" URL`). 200 uploads an hour. | `fileName`, `mimeType`, `sizeBytes` or `files` | uploads:write |
 | `finalize_media_upload` | After the `PUT`, check the stored file and return its `url` and `mediaType`, like `upload_media_from_url`: one upload as `uploadId`, or up to 25 as `uploads` (`items` in input order, failed ones in `errors` with `retriable`). A file over the plan limit or not of the declared type is deleted. Adds it to the media library unless `addToMediaLibrary: false`. | `uploadId` or `uploads`, `fileName`, `addToMediaLibrary` | uploads:write |
 | `list_account_destinations` | Channels, communities, blogs or lists inside one account (Telegram, Slack, Lemmy, Tumblr, Dev.to, Hashnode, WordPress, Listmonk, Dribbble). Pass the id as `metadata.destination_id` on that target; `input` checks one the user named. | `accountId`, `input`, `fresh` | posts:read |
@@ -26,7 +30,7 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the accoun
 | `generate_post_image` | 1 to 4 AI images from a description or the caption. Studio, Pro and Agency; 5 AI credits per image. Too few credits fails with `credits_exhausted`: tell the user how many are needed, do not retry. | `prompt` or `caption`, `aspect`, `count` | uploads:write |
 | `list_pinterest_boards` | Boards of each connected Pinterest account. A Pin is saved to a board: pass the chosen board's `id` as `metadata.boardId` on the Pinterest target. An account with one board needs no `boardId`. | `accountId` | posts:read |
 
-The four published-media tools need `accountId` (a @handle or id) when the user has several accounts.
+`list_published_media` needs `accountId` (a @handle or id) when the user has several accounts.
 
 ## Posts and scheduling
 
@@ -34,17 +38,17 @@ The four published-media tools need `accountId` (a @handle or id) when the user 
 |---|---|---|---|---|
 | `create_scheduled_post` | New post. No `scheduledAt` = draft, with it = scheduled; `nextSlot: true` takes the next free posting slot. | `text`, `platforms[]` (`platform`, optional `accountId`, `contentType` `carousel`, per-target `text`, `media`, `metadata`, `article`, `detached`), `media[]` (`type`, `url`, `altText`, `coverUrl`, `coverTimeMs`), `scheduledAt` or `nextSlot`, `timezone`, `signatureId` | posts:write | no |
 | `schedule_post` | Schedule an existing draft; can attach a comment automation (left off). | `postId` or `postName`, `scheduledAt`, `timezone`, `attach_automation` (one of `keyword`+`link`, `prompt`, `template_id`+`inputs`; optional `accountId`) | posts:write (+ flows:write when attaching) | no |
-| `arm_post_automation` | Make the comment automation attached to a scheduled post go live with the post. The first call returns a summary and a `contentHash`; after the user agrees, call again with `confirm: true` and that `contentHash`. | `postId` or `postName`, `confirm`, `contentHash` | posts:write, flows:write | yes, two calls |
+| `arm_post_automation` | Make the comment automation attached to a scheduled post go live with the post. Asks for confirmation. With an API key: `confirm: true` without `contentHash` returns the steps and a `contentHash`; after the user agrees, `confirm: true` with that `contentHash` arms it. A changed automation is refused. | `postId` or `postName`, `confirm`, `contentHash` | posts:write, flows:write | yes |
 | `update_scheduled_post` | Edit or reschedule a draft or scheduled post. Media replaces all. | `postId` or `postName`, `text`, `media`, `scheduledAt`, `timezone`, `signatureId`, `detachedPlatforms`, `articles` | posts:write | no |
 | `duplicate_scheduled_post` | Copy a post as a new draft (text, media, channels, options, tags). | `postId` or `postName` | posts:write | no |
 | `cancel_scheduled_post` | Scheduled to draft. Idempotent. | `postId` or `postName` | posts:write | no |
 | `delete_scheduled_post`, `bulk_delete_scheduled_posts` | Delete one post, or up to 50 at once. AI apps: 50 deletes a day. | `postId` or `postName`; `postIds[]` | posts:write, agent:destructive | yes |
-| `restore_scheduled_post` | Bring a deleted post back; a scheduled one comes back as a draft. | `postId` or `postName` | posts:write, agent:destructive | yes |
+| `restore_scheduled_post` | Bring a deleted post back; one that was scheduled or waiting for approval comes back as a draft (`needsScheduling: true`). An attached automation is not restored. | `postId` or `postText` (words from its text) | posts:write | no |
 | `bulk_reschedule_posts` | Move up to 50 posts; per-post failures are listed. | `postIds[]`, `scheduledAt`, `timezone` | posts:write | no |
 | `publish_post_now` | Publish immediately. Irreversible. | `postId` or `postName` | posts:write | yes |
 | `publish` | Same outcome as `publish_post_now`; prefer that one. | `postId`, `platforms` | posts:write | yes |
 | `list_scheduled_posts` | Drafts, scheduled, published, failed. | `status` (`draft`, `scheduled`, `published`, `failed`, `all`), `platform`, `limit`, `sortOrder`, `cursor` | posts:read | no |
-| `get_scheduled_post` | One post with per-target status and its automation. | `postId` | posts:read | no |
+| `get_scheduled_post` | One post with per-target status, error, live link, `contentType` and `options` (the platform options set on that target), and its automation. | `postId` | posts:read | no |
 | `get_scheduler_calendar` | Posts in a date range, 200 max. | `fromDate`, `toDate` (ISO), `platform` | posts:read | no |
 | `add_to_evergreen`, `list_evergreen` | Queue of recyclable captions that fills gaps in the calendar. | `text`, `sourcePostId` | posts:write / posts:read | no |
 | `find_next_slot` | Next free posting slot for these accounts (next 60 days). Read only; holds nothing. | `accountIds`, `after` | posts:read | no |
@@ -59,6 +63,11 @@ The four published-media tools need `accountId` (a @handle or id) when the user 
 
 A tool the user's plan does not include fails with `feature_disabled`.
 
+Platform options go in a target's `metadata` as strings:
+- `li_document: "true"`: a LinkedIn post with 2 or more images goes out as one document (a swipeable PDF, one page per image).
+- `li_document_title`: the title shown above that LinkedIn document, plain text up to 400 characters; without it the first line of the text is used.
+- `yt_upload_now: "true"`: a YouTube video is uploaded right away as private and goes public at the scheduled time; editing or cancelling the post updates or deletes it on YouTube. Needs the YouTube account reconnected for the `youtube.force-ssl` permission.
+
 `scheduledAt` accepts ISO 8601 or `tomorrow 9am`, `friday 5pm`, `next monday`, `in 2 hours`, resolved in `timezone` (UTC if omitted).
 
 ## Analytics
@@ -66,7 +75,7 @@ A tool the user's plan does not include fails with `feature_disabled`.
 | Tool | Purpose | Key args | Scope |
 |---|---|---|---|
 | `get_analytics_overview` | Totals, per-platform counts and a 30 day timeline. | `startDate`, `endDate` (YYYY-MM-DD), `platform` | posts:read |
-| `get_post_analytics` | Impressions, reach, engagement, likes, comments, shares, saves, clicks for one published post. | `postId` | posts:read |
+| `get_post_analytics` | Impressions, reach, engagement, likes, comments, shares, saves, clicks for one published post, one row per target. An Instagram Reel's row adds `avgWatchTimeSeconds` and `totalWatchTimeSeconds` once Instagram reports them. | `postId` | posts:read |
 | `get_content_insights` | Which formats, weekdays and pillars beat the account average, with sample sizes, plus top and bottom posts. | `weeks` (1 to 12) | analytics:read |
 | `get_flow_stats` | Triggers, button clicks, unique users, status breakdown, 7 day timeline for one flow. | `flowId` | flows:read |
 | `get_collected_data` | What a flow collected: counts and field types only, never the values. | `flowId`, `fieldType`, `limit` | flows:read |
@@ -81,23 +90,36 @@ Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs
 | `create_automation` | Draft from an outcome sentence, returns a plain-language preview. Never goes live. | `outcome`, `accountId` | flows:write | no |
 | `generate_multiple_flows` | Rebuild a whole setup (up to 10 drafts), for example migrating from another tool. Starter plan and up. | `description`, `accountId` | flows:write | yes |
 | `create_flow` | Empty draft to build node by node. | `name`, `accountId`, `platformUserId`, `platform`, `trigger` | flows:write | no |
-| `list_flows` | Browse flows. `mode`: `search` finds one by name (`query`); `rank` ranks them by `metric` (`triggers`, `completions`, `unique_users`, `button_clicks`). | `mode`, `query`, `metric`, `status`, `limit`, `sortBy`, `sortOrder`, `cursor`, `accountId` | flows:read | no |
-| `get_flow` | One flow with nodes and edges (`nodeId` for one node). Each step lists its `outputs` (handle, label, where it leads); each edge has an `id`. | `flowId` | flows:read | no |
+| `list_flows` | Browse flows. `mode`: `search` finds one by name (`query`); `rank` ranks them by `metric` (`triggers`, `completions`, `unique_users`, `button_clicks`). A live flow with unpublished changes has `hasPendingChanges: true`. | `mode`, `query`, `metric`, `status`, `limit`, `sortBy`, `sortOrder`, `cursor`, `accountId` | flows:read | no |
+| `get_flow` | One flow with nodes and edges (`nodeId` for one node). Each step lists its `outputs` (handle, label, where it leads); each edge has an `id`. A live flow with unpublished changes returns `pendingChanges`; `version: "pending"` returns the unpublished steps (`live`, the default, the version people get). | `flowId`, `nodeId`, `version` | flows:read | no |
 | `summarize_flow_purpose` | One sentence about a flow. | `flowId` | flows:read | no |
 | `list_system_templates` | Ready-made automation templates. | `category`, `limit`, `cursor` | flows:read | no |
 | `update_flow` | Rename or change description. | `flowId` or `flowName`, `name`, `description` | flows:write | no |
-| `update_node` | Change one step. Merges, never replaces. Rejects flows that are on. | `flowName`, `nodeId` (id or label), `text`, `link`, `keywords`, `data`, `name` | flows:write | no |
-| `add_node`, `delete_node` | Add or remove a step of a draft. `add_node` can add a `follow_gate` (with `allowFollowGate: true`, Instagram only). | `flowId` or `flowName`, `type`, `position`, `data`, `allowFollowGate`, `nodeId` | flows:write | no |
-| `add_edge`, `update_edge`, `delete_edge` | Connect, re-route or remove a connection of a draft. Name the output in `sourceHandle` by handle (`button-0`, `yes`, `followed`) or by button label; leave it out for a step's plain next output. One connection per button or branch: use `update_edge` to send it elsewhere. A wrong output is refused with the list of valid ones. | `flowId` or `flowName`, `source`, `target`, `sourceHandle`, `edgeId`, `newTarget` | flows:write | no |
-| `duplicate_flow` | Copy to a new draft (edit a live flow while it keeps running). | `flowName`, `newName` | flows:write | no |
+| `update_node` | Change one step. Merges, never replaces. On a live flow the change is saved as unpublished changes. | `flowName`, `nodeId` (id or label), `text`, `link`, `keywords`, `data`, `name` | flows:write | no |
+| `add_node`, `delete_node` | Add or remove a step. `add_node` can add a `follow_gate` (with `allowFollowGate: true`, Instagram only). On a live flow the change is saved as unpublished changes. | `flowId` or `flowName`, `type`, `position`, `data`, `allowFollowGate`, `nodeId` | flows:write | no |
+| `add_edge`, `update_edge`, `delete_edge` | Connect, re-route or remove a connection; on a live flow the change is saved as unpublished changes. Name the output in `sourceHandle` by handle (`button-0`, `yes`, `followed`) or by button label; leave it out for a step's plain next output. One connection per button or branch: use `update_edge` to send it elsewhere. A wrong output is refused with the list of valid ones. | `flowId` or `flowName`, `source`, `target`, `sourceHandle`, `edgeId`, `newTarget` | flows:write | no |
+| `duplicate_flow` | Copy to a new draft. | `flowName`, `newName` | flows:write | no |
 | `bulk_update_flows` | Edit up to 50 flows at once. | `flowIds`, `filter`, `patch` | flows:write | no |
-| `activate_flow` | Turn a flow on. Runs the same checks as the Turn on button: placeholders, plan, keyword conflicts (returned as `warnings`). | `flowName` or `flowId` | flows:write | no, ask the user |
-| `deactivate_flow` | Turn a flow off. | `flowName` or `flowId` | flows:write | no |
-| `get_flow_revisions`, `revert_flow_to_version` | History and undo for a flow. | `flowId`, `targetVersion` | flows:read / flows:write | no |
+| `activate_flow` | Turn a flow on. Runs the same checks as the Turn on button: placeholders, plan, keyword conflicts (returned as `warnings`). The confirmation names the flow and the account it messages from; with an API key, `confirm: true` runs it in one call. | `flowName` or `flowId`, `confirm` | flows:write | yes |
+| `deactivate_flow` | Turn a flow off. Refused while the flow has unpublished changes (`current: "pending_changes"`). | `flowName` or `flowId` | flows:write | no |
+| `publish_flow_changes` | Put a live flow's unpublished changes live, after the same checks as turning a flow on. A paused flow stays paused. With an API key: `confirm: true` without `expectedRev` returns a preview (steps added, changed and removed, people partway through a removed step, `rev`), then `confirm: true` with `expectedRev` set to that `rev` publishes. | `flowName` or `flowId`, `confirm`, `expectedRev` | flows:write | yes |
+| `discard_flow_changes` | Drop a live flow's unpublished changes; people keep getting the live version. Same two steps as `publish_flow_changes`. Dropped changes can be restored from the flow in SociaHive while they are kept. | `flowName` or `flowId`, `confirm`, `expectedRev` | flows:write | yes |
+| `get_flow_revisions`, `revert_flow_to_version` | History and undo for a flow. On a live flow a revert is saved as unpublished changes. | `flowId`, `targetVersion` | flows:read / flows:write | no |
 | `delete_flow` | Move a flow to the trash (30 days). | `flowName` or `flowId` | flows:write, agent:destructive | yes |
-| `restore_flow` | Bring a flow back from the trash as a draft. | `flowName` or `flowId` | flows:write, agent:destructive | yes |
+| `restore_flow` | Bring a flow back from the trash as a draft (off until turned on). | `flowName` or `flowId` | flows:write | no |
 
-A live flow can't be edited. To change it in place: `deactivate_flow`, edit, then `activate_flow` (it answers nobody while it is off). To keep it running: `duplicate_flow`, edit the copy, `activate_flow` the copy, then `deactivate_flow` the original. `get_flow` reports `build.status` while a flow is still being built; edits wait until it is `ready`.
+Edits to a live flow (published or paused) are saved as unpublished changes, and their answer has `pendingChanges: true`; people keep getting the live version until `publish_flow_changes`. `get_flow` reports `build.status` while a flow is still being built; edits wait until it is `ready`.
+
+### Comment trigger settings
+
+Instagram and YouTube comment triggers. Set on the trigger step with `update_node`, as `data: { triggers: [{ config: { ... } }] }`; only the keys sent change. Caps are whole numbers from 1 to 1000; `null` removes one. They count the comment reply and keyword replies, and over a cap the public reply is skipped while the DM still goes.
+
+| Key | What it does |
+|---|---|
+| `comment_reply_post_cap_per_hour` | At most this many public replies on one post in a clock hour. |
+| `comment_reply_post_cap_per_day` | At most this many public replies on one post in 24 hours, counted from the first reply; replies resume when they end. |
+| `comment_reply_post_cap_total` | At most this many public replies on one post overall. |
+| `comment_reply_disabled_media_ids` | Posts (up to 100 media ids) where the trigger sends no public reply; DMs still go. `null` switches them back on. |
 
 ## Contacts and growth tools
 
@@ -107,14 +129,14 @@ Broadcasts, sequences, landing pages, widgets, ref links and tags work on Connec
 |---|---|---|---|
 | `create_broadcast`, `create_sequence` | Draft a one-off or drip message to contacts. Never sends. | broadcasts:write, sequences:write | yes |
 | `create_landing_page`, `create_growth_widget` | Disabled drafts the user enables in SociaHive. | growth_tools:write | yes |
-| `create_ref_url` | Tracked link for a flow. | growth_tools:write | no |
+| `create_ref_url` | Tracked link that counts clicks. Only `name` is required. Without `flow_id` it opens the account on `platform` (Instagram, the default: its profile; Messenger, Telegram or WhatsApp: a chat); with `flow_id` it opens that automation. WhatsApp only: `messageText` is the chat's opening text (`{code}` marks where the code goes, else it is added at the end; up to 300 characters), `plainCode: true` writes the code without `REF_`. | growth_tools:write | no |
 | `get_pixel_embed` | Pixel install snippet. | analytics:read | no |
 | `search_tags`, `create_tag`, `find_references` | Contact tags. | tags:read, tags:write | no |
 | `capture_lead`, `resolve` | Record a lead; answer a support conversation from the knowledge base. | accounts:write | no |
 
 ## Not available to agents
 
-Disconnecting accounts, exporting collected lead values, removing a post's automation, arming a post's automation ("turn on when this post goes live"). If asked, say it is done in the SociaHive dashboard.
+Disconnecting accounts, exporting collected lead values, removing a post's automation. If asked, say it is done in the SociaHive dashboard.
 
 ## MCP resources
 

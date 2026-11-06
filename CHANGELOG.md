@@ -4,6 +4,18 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.9] - 2026-11-05
+
+### Changed
+
+- Confirmation: `activate_flow` and `upload_media_from_url` ask for confirmation before they run. With an API key they also run in one call with `confirm: true`; with OAuth sign-in only the `__confirmToken` call confirms. `arm_post_automation`, `publish_flow_changes` and `discard_flow_changes` take `confirm: true` twice with an API key: a preview first, then the call with its `contentHash` or `expectedRev`.
+- Deleting: the skill now describes `delete_scheduled_post`, `bulk_delete_scheduled_posts` and `delete_flow` (after a confirmation, with the `agent:destructive` permission) and `restore_scheduled_post` and `restore_flow`. Restoring needs no confirmation, and `restore_scheduled_post` finds a post by `postId` or `postText`.
+- Live flows: edits to a published or paused flow are saved as unpublished changes. `publish_flow_changes` and `discard_flow_changes` are documented, with `pendingChanges` and `version: "pending"` in `get_flow`, `hasPendingChanges` in `list_flows`, and `deactivate_flow` refused while changes are waiting.
+- `arm_post_automation` is documented in the comment-to-DM workflow; it was listed as unavailable to agents.
+- Tool groups: `list_toolsets`, `enable_toolset`, the groups, `?toolsets=` and `X-MCP-Toolsets`.
+- Tool catalog: `create_ref_url` (`messageText`, `plainCode`, what a link without `flow_id` opens), Reels watch time in `get_post_analytics`, `options` and `contentType` in `get_scheduled_post`, the `li_document`, `li_document_title` and `yt_upload_now` options, and the per-post public reply caps on comment triggers.
+- CLI reference: `flows list --query/--stats/--metric/--account-id`, `flows update-edge`, `delete-edge`, `publish-changes`, `discard-changes`, `restore`, `posts arm`, `posts restore`, `ref-url create --plain-code --message-text` (CLI 0.4.0 or later), and the requirements of `posts delete` and `flows delete`.
+
 ## [1.1.8] - 2026-11-04
 
 ### Changed
