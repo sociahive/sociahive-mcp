@@ -4,6 +4,17 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.10] - 2026-11-19
+
+### Added
+
+- `create_youtube_comment_flow`: build a YouTube comment automation (public replies to comments on videos and Shorts, on a keyword or every comment, with rotating reply texts, a delay and per-video limits) as a draft; `activate_flow` turns it on. It is in the `flows-advanced` group.
+
+### Changed
+
+- `get_capabilities` lists `automation` for YouTube when the account can use YouTube comment automations.
+- Tool catalog: editing a YouTube comment automation with `update_node`, and copying it with `duplicate_flow`.
+
 ## [1.1.9] - 2026-11-05
 
 ### Changed

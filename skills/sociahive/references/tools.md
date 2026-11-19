@@ -82,7 +82,7 @@ Platform options go in a target's `metadata` as strings:
 
 ## Automations (flows)
 
-Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs to one connected account.
+Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs to one connected account. YouTube comment automations are built with `create_youtube_comment_flow` (see below), not `generate_flow` or `create_flow`.
 
 | Tool | Purpose | Key args | Scope | Confirm |
 |---|---|---|---|---|
@@ -90,6 +90,7 @@ Flow platforms: `instagram`, `whatsapp`, `messenger`, `telegram`. A flow belongs
 | `create_automation` | Draft from an outcome sentence, returns a plain-language preview. Never goes live. | `outcome`, `accountId` | flows:write | no |
 | `generate_multiple_flows` | Rebuild a whole setup (up to 10 drafts), for example migrating from another tool. Starter plan and up. | `description`, `accountId` | flows:write | yes |
 | `create_flow` | Empty draft to build node by node. | `name`, `accountId`, `platformUserId`, `platform`, `trigger` | flows:write | no |
+| `create_youtube_comment_flow` | YouTube comment automation as a draft: public replies to comments on the channel's videos and Shorts, on every comment or only those with a keyword. In the `flows-advanced` group. | `accountId`, `name`, `keywords`, `videoIds`, `replies` (1 to 10), `replyDelaySeconds`, `postCapPerHour`, `postCapPerDay`, `postCapTotal` | flows:write | no |
 | `list_flows` | Browse flows. `mode`: `search` finds one by name (`query`); `rank` ranks them by `metric` (`triggers`, `completions`, `unique_users`, `button_clicks`). A live flow with unpublished changes has `hasPendingChanges: true`. | `mode`, `query`, `metric`, `status`, `limit`, `sortBy`, `sortOrder`, `cursor`, `accountId` | flows:read | no |
 | `get_flow` | One flow with nodes and edges (`nodeId` for one node). Each step lists its `outputs` (handle, label, where it leads); each edge has an `id`. A live flow with unpublished changes returns `pendingChanges`; `version: "pending"` returns the unpublished steps (`live`, the default, the version people get). | `flowId`, `nodeId`, `version` | flows:read | no |
 | `summarize_flow_purpose` | One sentence about a flow. | `flowId` | flows:read | no |
@@ -120,6 +121,18 @@ Instagram and YouTube comment triggers. Set on the trigger step with `update_nod
 | `comment_reply_post_cap_per_day` | At most this many public replies on one post in 24 hours, counted from the first reply; replies resume when they end. |
 | `comment_reply_post_cap_total` | At most this many public replies on one post overall. |
 | `comment_reply_disabled_media_ids` | Posts (up to 100 media ids) where the trigger sends no public reply; DMs still go. `null` switches them back on. |
+
+### YouTube comment automations
+
+YouTube has no DMs, so the public reply is the whole automation: one trigger step, no other steps. `create_youtube_comment_flow` builds it as a draft:
+
+- `keywords`: reply only to comments containing one of them. Omit to reply to every comment.
+- `videoIds`: video or Short ids, or their links. Omit for every video and Short, new ones included.
+- `replies`: 1 to 10 reply texts, up to 10,000 characters each. With several, they take turns.
+- `replyDelaySeconds`: 0, 60, 300, 900, 1800 or 3600.
+- `postCapPerHour`, `postCapPerDay`, `postCapTotal`: per-video reply limits, as in the table above.
+
+It is created off; `activate_flow` turns it on after the user agrees, and its `warnings` list anything that would stop that. Find it later with `list_flows` and `platform: "youtube"`. To change it, `update_node` on the trigger step with `data: { triggers: [{ config: { ... } }] }`: the keys above plus `keywords`, `reaction_type` (`"keyword"` or `"any"`), `comment_reply_templates` (the replies) and `comment_reply_delay_s`. To change the videos, send `media_ids` together with `select_all_posts` and `select_all_future` (`true` with an empty list for every video, `false` with ids). `duplicate_flow` copies one, for example one per topic. `get_capabilities` lists `automation` for YouTube when the account can use it.
 
 ## Contacts and growth tools
 
