@@ -10,10 +10,10 @@ Ids: `postId` is a scheduler post id; `flowId` a flow id; `accountId` the accoun
 |---|---|---|---|
 | `whoami` | Signed-in user, tier, plan limits. Call first. | none | none |
 | `list_capabilities` | Tools this key can call. | none | none |
-| `list_toolsets` | Tool groups this connection can load, their tools, and which are loaded. Listed only in clients that start with the `core` group (Claude Code). | none | none |
+| `list_toolsets` | Tool groups this connection can load, their tools, and which are loaded. Listed only in connections that asked for groups (`?toolsets=a,b`). | none | none |
 | `enable_toolset` | Load one tool group and return its tools. Its description lists the groups this account can load. Listed only with `list_toolsets`. | `name` | none |
 
-Tool groups: `core`, `flows-advanced`, `scheduler-advanced`, `media`, `analytics`, `growth`, `agency`, `admin-bulk` (the delete tools). Clients that start with `core` load the others with `enable_toolset`; every other client gets all tools. `?toolsets=a,b` on the server URL or the `X-MCP-Toolsets: a,b` header picks groups when connecting; `?toolsets=all` gives every tool. A tool that is not listed can still be called by name.
+Tool groups: `core`, `flows-advanced`, `scheduler-advanced`, `media`, `analytics`, `growth`, `agency`, `admin-bulk` (the delete tools). Every client gets all tools. `?toolsets=a,b` on the server URL or the `X-MCP-Toolsets: a,b` header starts a connection with `core` and those groups only; it loads others with `enable_toolset`. `?toolsets=all` gives every tool. A tool that is not listed can still be called by name.
 
 ## Accounts and media
 
