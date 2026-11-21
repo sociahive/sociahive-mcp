@@ -4,6 +4,12 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.11] - 2026-11-21
+
+### Changed
+
+- Tool groups: every client now gets every tool when it connects, Claude Code included. `list_toolsets` and `enable_toolset` are listed only on a connection that asked for groups with `?toolsets=a,b` or `X-MCP-Toolsets`.
+
 ## [1.1.10] - 2026-11-19
 
 ### Added

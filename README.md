@@ -88,7 +88,7 @@ MCP, API key and CLI access are part of the 7-day trial and every paid plan.
 - **Analytics:** `get_post_analytics`, `get_analytics_overview`, `get_flow_stats`, `get_content_insights`
 - **Leads and growth:** `capture_lead`, `get_collected_data`, `create_broadcast`, `create_sequence`, `create_growth_widget`, `create_ref_url`, `get_pixel_embed`
 
-Tools come in groups. Claude Code starts with the `core` group plus `list_toolsets` and `enable_toolset`, and loads another group when a request needs it; other clients get every tool. Add `?toolsets=a,b` to the server URL (or `?toolsets=all`) to choose.
+Tools come in groups. Every client gets every tool when it connects. For a shorter list, add `?toolsets=a,b` to the server URL: the connection starts with the `core` group, those groups, `list_toolsets` and `enable_toolset`, and loads more groups when a request needs them.
 
 ## Install
 
