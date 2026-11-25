@@ -4,6 +4,13 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.12] - 2026-11-25
+
+### Changed
+
+- Rate limits: 300 reads per minute (was 120).
+- Confirmation: at most 20 confirmations wait at once per user. `confirm_superseded` (the token was replaced by newer ones and never ran: get a fresh one) is told apart from `confirm_already_consumed` (check whether the action happened first).
+
 ## [1.1.11] - 2026-11-21
 
 ### Changed
