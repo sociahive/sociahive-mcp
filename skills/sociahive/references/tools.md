@@ -75,7 +75,7 @@ Platform options go in a target's `metadata` as strings:
 | Tool | Purpose | Key args | Scope |
 |---|---|---|---|
 | `get_analytics_overview` | Totals, per-platform counts and a 30 day timeline. | `startDate`, `endDate` (YYYY-MM-DD), `platform` | posts:read |
-| `get_post_analytics` | Impressions, reach, engagement, likes, comments, shares, saves, clicks for one published post, one row per target. An Instagram Reel's row adds `avgWatchTimeSeconds` and `totalWatchTimeSeconds` once Instagram reports them. | `postId` | posts:read |
+| `get_post_analytics` | Impressions, reach, engagement, likes, comments, shares, saves, clicks for one published post, one row per target. An Instagram Reel's row adds `avgWatchTimeSeconds`, `totalWatchTimeSeconds` and `insights.reels_skip_rate` (share of plays skipped in the first 3 seconds). A YouTube video's row adds `avgWatchTimeSeconds`, `avgViewPercentage` and, in `insights`, `engaged_views`, `engaged_view_rate` (engaged views as a share of views), `subscribed_views`, `unsubscribed_views`, `subscribed_watch_minutes` and `unsubscribed_watch_minutes`; YouTube reports them 2 to 3 days after publishing. Rates are 0 to 100; each number appears once the platform reports it. | `postId` | posts:read |
 | `get_content_insights` | Which formats, weekdays and pillars beat the account average, with sample sizes, plus top and bottom posts. | `weeks` (1 to 12) | analytics:read |
 | `get_flow_stats` | Triggers, button clicks, unique users, status breakdown, 7 day timeline for one flow. | `flowId` | flows:read |
 | `get_collected_data` | What a flow collected: counts and field types only, never the values. | `flowId`, `fieldType`, `limit` | flows:read |

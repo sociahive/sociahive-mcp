@@ -4,6 +4,12 @@ All notable changes to this repository are listed here. The format follows [Keep
 
 The MCP server itself runs on SociaHive's side and changes without a release here. This file covers the manifests, the skill and the setup docs in this repository.
 
+## [1.1.13] - 2026-11-25
+
+### Changed
+
+- Tool catalog: `get_post_analytics` lists the newer post numbers. Instagram Reel: `reels_skip_rate`. YouTube video: average view percentage, engaged views, the engaged-view rate, and views and watch minutes from subscribers and non-subscribers.
+
 ## [1.1.12] - 2026-11-25
 
 ### Changed
